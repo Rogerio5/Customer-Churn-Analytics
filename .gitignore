@@ -43,3 +43,8 @@ dist/
 Thumbs.db
 *.log
 
+
+# Local backup files
+*.bak
+*.backup.csv
+~$*.pbix

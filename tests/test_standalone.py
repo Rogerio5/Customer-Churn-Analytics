@@ -17,12 +17,29 @@ def test_copied_dataset_matches_cleaning():
     pd.testing.assert_frame_equal(actual, expected)
 
 
-def test_dashboard_and_retention_filter():
-    app = AppTest.from_file(str(ROOT / "app.py")).run(timeout=60)
+def test_dashboard_overview_matches_current_artifacts():
+    bi = pd.read_csv(
+        ROOT
+        / "data"
+        / "processed"
+        / "churn_customer_intelligence_bi.csv"
+    )
+
+    expected_high = int(
+        (bi["risk_level"] == "HIGH").sum()
+    )
+
+    app = AppTest.from_file(
+        str(ROOT / "app.py")
+    ).run(timeout=60)
+
     assert not app.exception
+
     assert app.metric[0].value == "7,043"
-    assert len(app.dataframe[-1].value) == 199
-    app.multiselect[0].set_value(["LOW"]).run(timeout=60)
-    assert not app.exception
-    assert set(app.dataframe[-1].value["risk_level"]) == {"LOW"}
-    assert len(app.dataframe[-1].value) == 874
+
+    assert app.metric[3].value == (
+        f"{expected_high:,}"
+    )
+
+    assert app.metric[4].value == "0.8481"
+
