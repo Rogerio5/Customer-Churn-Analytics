@@ -1,65 +1,117 @@
 # Customer Churn Analytics
 
-**Análise de cancelamento, previsão de risco e priorização de retenção de clientes.**
+> **Customer Analytics · Machine Learning · Retention Intelligence · Explainable AI · Streamlit · SQL · Power BI**
 
-O **Customer Churn Analytics** é um projeto completo de análise de dados e aprendizado de máquina desenvolvido para compreender padrões de cancelamento de clientes, estimar o risco de churn e transformar previsões em informações úteis para ações de retenção.
+Solução end-to-end para **análise de churn, previsão de risco e priorização de retenção de clientes**, desenvolvida com Python, Machine Learning, explicabilidade, SQL, Streamlit e Power BI.
 
-A solução integra **Python, Machine Learning, explicabilidade, Streamlit, SQL e Power BI**.
+O projeto utiliza a base **IBM Telco Customer Churn** para investigar padrões históricos de cancelamento, comparar modelos preditivos, estimar o risco de churn e transformar probabilidades em informações úteis para ações de retenção.
 
-> **Pergunta de negócio:** quais clientes apresentam maior risco de cancelar o serviço e como organizar a priorização das ações de retenção?
+> **Pergunta de negócio:** quais clientes apresentam maior risco estimado de cancelar o serviço e como organizar a priorização das ações de retenção?
 
 **Versão 1.1** · **Python 3.12.1** · **Streamlit** · **Power BI** · **Licença MIT**
 
-[Visão geral](#visão-geral) ·
-[Problema](#problema-de-negócio) ·
-[Resultados](#resultados-dos-modelos) ·
-[Previsão](#previsão-de-novos-clientes) ·
-[Power BI](#power-bi) ·
-[Como executar](#como-executar) ·
-[Validação](#validação-da-versão-11)
+---
+
+<a id="indice"></a>
+
+# Índice
+
+1. [Visão rápida](#visao-rapida)
+2. [Problema de negócio](#problema-de-negocio)
+3. [Demonstração visual](#demonstracao-visual)
+   - [Streamlit](#demonstracao-streamlit)
+   - [Power BI](#demonstracao-powerbi)
+4. [Arquitetura da solução](#arquitetura-da-solucao)
+5. [Dados utilizados](#dados-utilizados)
+6. [Análise exploratória](#analise-exploratoria)
+7. [Análise estatística](#analise-estatistica)
+8. [Preparação dos dados](#preparacao-dos-dados)
+9. [Estratégia de validação](#estrategia-de-validacao)
+10. [Modelos avaliados](#modelos-avaliados)
+11. [Resultados dos modelos](#resultados-dos-modelos)
+12. [Avaliação no teste final](#avaliacao-no-teste-final)
+13. [Segmentação de risco](#segmentacao-de-risco)
+14. [Prioridade de retenção](#prioridade-de-retencao)
+15. [Previsão x comportamento observado](#previsao-x-observado)
+16. [Previsão de novos clientes](#previsao-novos-clientes)
+17. [Modelo operacional](#modelo-operacional)
+18. [Explicabilidade](#explicabilidade)
+19. [Aplicação Streamlit](#aplicacao-streamlit)
+20. [Dashboard Power BI](#dashboard-powerbi)
+21. [Perfil da base](#perfil-da-base)
+22. [SQL Analytics](#sql-analytics)
+23. [Tecnologias](#tecnologias)
+24. [Estrutura do projeto](#estrutura-do-projeto)
+25. [Como executar](#como-executar)
+26. [Comandos principais](#comandos-principais)
+27. [Validação](#validacao)
+28. [Rastreabilidade](#rastreabilidade)
+29. [Testes automatizados](#testes-automatizados)
+30. [Entregas](#entregas)
+31. [Limitações](#limitacoes)
+32. [Uso responsável](#uso-responsavel)
+33. [Próximas evoluções](#proximas-evolucoes)
+34. [Origem e evolução](#origem-e-evolucao)
+35. [Autor](#autor)
+36. [Licença](#licenca)
 
 ---
 
-## Visão geral
+<a id="visao-rapida"></a>
 
-O projeto utiliza a base **IBM Telco Customer Churn**, composta por **7.043 clientes**, para investigar características associadas ao cancelamento do serviço.
+# Visão rápida
 
-A versão 1.1 organiza o processo de modelagem separando o desenvolvimento da avaliação final.
+| Indicador | Resultado |
+|---|---:|
+| Clientes na base | **7.043** |
+| Clientes com churn | **1.869** |
+| Taxa histórica de churn | **26,54%** |
+| Desenvolvimento | **5.634 clientes** |
+| Teste final | **1.409 clientes** |
+| Modelos comparados | **3** |
+| Validação cruzada | **5 folds** |
+| Modelo selecionado | **Logistic Regression** |
+| ROC-AUC médio CV | **0,8436** |
+| ROC-AUC final | **0,8481** |
+| Testes automatizados | **152 PASS** |
+| Qualidade de código | **Ruff PASS** |
+
+### Fluxo resumido
 
 ```text
 7.043 clientes
       │
-      ├── 5.634 clientes
-      │        ↓
-      │  Desenvolvimento
-      │        ↓
-      │  Validação cruzada estratificada
-      │        ↓
-      │  Comparação de 3 modelos
-      │        ↓
-      │  Seleção do modelo
+      ├── 5.634
+      │     ↓
+      │ Desenvolvimento
+      │     ↓
+      │ Cross-Validation
+      │     ↓
+      │ Comparação de modelos
+      │     ↓
+      │ Seleção
       │
-      └── 1.409 clientes
-               ↓
-          Teste final
-               ↓
-          Avaliação do modelo
+      └── 1.409
+            ↓
+        Teste final
+            ↓
+        Avaliação
 ```
 
-Após a seleção do algoritmo, um modelo operacional é treinado para permitir a previsão de novos clientes dentro da aplicação Streamlit.
+O projeto não termina na geração de uma métrica de Machine Learning.
 
-O projeto vai além da criação de um modelo preditivo. Ele conecta:
+Ele conecta:
 
 ```text
 Dados
   ↓
 Análise
   ↓
-Modelagem
+Machine Learning
   ↓
-Avaliação
+Validação
   ↓
-Explicação
+Explicabilidade
   ↓
 Segmentação de risco
   ↓
@@ -68,137 +120,322 @@ Priorização de retenção
 Streamlit + Power BI
 ```
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Problema de negócio
+<a id="problema-de-negocio"></a>
+
+# Problema de negócio
 
 Uma operação de retenção não consegue abordar todos os clientes com a mesma prioridade.
 
 Por isso, é necessário identificar quais clientes apresentam maior risco estimado de cancelamento e organizar uma fila de atendimento baseada em dados.
 
-O projeto busca apoiar perguntas como:
+O projeto busca responder perguntas como:
 
 - quais perfis apresentam maior ocorrência histórica de churn;
 - quais clientes apresentam maior probabilidade estimada de cancelamento;
 - quais clientes devem ser analisados primeiro;
-- quais características contribuíram para uma determinada previsão;
+- quais características contribuíram para determinada previsão;
 - como transformar o resultado do modelo em informação compreensível;
 - como apresentar os resultados para acompanhamento operacional e gerencial.
 
-O projeto não afirma que determinada característica cause churn e não garante que um cliente classificado como alto risco irá cancelar.
+> O projeto não afirma que uma característica cause churn e não garante que um cliente classificado como alto risco irá cancelar.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Principais indicadores
+<a id="demonstracao-visual"></a>
 
-| Indicador | Resultado |
-|---|---:|
-| Clientes na base | **7.043** |
-| Clientes com churn | **1.869** |
-| Taxa histórica de churn | **26,54%** |
-| Conjunto de desenvolvimento | **5.634** |
-| Conjunto de teste final | **1.409** |
-| Modelos comparados | **3** |
-| Validação cruzada | **5 folds** |
-| Modelo selecionado | **Logistic Regression** |
-| ROC-AUC médio na validação cruzada | **0,8436** |
-| ROC-AUC no teste final | **0,8481** |
-| Testes automatizados | **152 aprovados** |
-| Qualidade de código | **Ruff aprovado** |
+# Demonstração visual
 
----
+O projeto possui duas principais interfaces de apresentação dos resultados:
 
-## Fluxo do projeto
+- **Streamlit** para exploração, previsão individual e operação;
+- **Power BI** para acompanhamento analítico e gerencial.
+
+Todas as capturas utilizadas como evidência estão armazenadas em:
 
 ```text
-IBM Telco Customer Churn
-          │
-          ▼
-Validação dos dados
-          │
-          ▼
-Limpeza e preparação
-          │
-          ▼
-Análise exploratória
-          │
-          ▼
-Análise estatística
-          │
-          ▼
-Preparação das variáveis
-          │
-          ▼
-Separação do teste final
-          │
-          ▼
-Validação cruzada no desenvolvimento
-          │
-          ▼
-┌─────────────────────────────────────┐
-│ Logistic Regression                 │
-│ Random Forest                       │
-│ XGBoost                             │
-└─────────────────────────────────────┘
-          │
-          ▼
-Comparação pelo ROC-AUC médio
-          │
-          ▼
-Seleção da Logistic Regression
-          │
-          ▼
-Avaliação no teste final
-          │
-          ▼
-Segmentação de risco
-          │
-     ┌────┴─────┐
-     ▼          ▼
- Streamlit   Power BI
-     │
-     ▼
-Previsão individual
-     │
-     ▼
-Explicação da previsão
+docs/evidence/
 ```
 
 ---
 
-## Dados utilizados
+<a id="demonstracao-streamlit"></a>
 
-A base contém informações relacionadas ao perfil, relacionamento e serviços utilizados pelos clientes.
+## Streamlit
 
-Entre as informações disponíveis estão:
+### Visão Geral
 
-- gênero;
-- cliente idoso;
-- parceiro;
-- dependentes;
-- tempo como cliente;
-- serviço telefônico;
-- múltiplas linhas;
-- serviço de internet;
-- segurança online;
-- backup online;
-- proteção de dispositivo;
-- suporte técnico;
-- streaming;
-- contrato;
-- fatura digital;
-- forma de pagamento;
-- cobrança mensal;
-- cobrança acumulada;
-- churn.
+A página principal apresenta KPIs, padrões históricos, segmentação de risco e informações do modelo.
 
-A variável alvo do projeto é:
+![Streamlit - Visão Geral](docs/evidence/streamlit/01-visao-geral/01-padroes-negocio.png)
+
+---
+
+### Prever Novo Cliente
+
+Permite informar os dados de um cliente e realizar uma previsão individual.
+
+![Streamlit - Prever Novo Cliente](docs/evidence/streamlit/02-prever-novo-cliente/01-formulario.png)
+
+---
+
+### Fila de Retenção
+
+Organiza clientes para análise operacional de retenção.
+
+![Streamlit - Fila de Retenção](docs/evidence/streamlit/03-fila-retencao/01-fila-operacional.png)
+
+---
+
+### Modelos e Explicabilidade
+
+Apresenta resultados, validação, teste final e explicações do modelo.
+
+![Streamlit - Modelos e Explicabilidade](docs/evidence/streamlit/04-modelos-explicabilidade/01-entender-resultado.png)
+
+---
+
+### Sobre o Projeto
+
+Apresenta problema, dados, modelo, ação e metodologia.
+
+![Streamlit - Sobre o Projeto](docs/evidence/streamlit/05-sobre-projeto/01-entenda-projeto.png)
+
+---
+
+<a id="demonstracao-powerbi"></a>
+
+## Power BI
+
+### Visão Executiva
+
+![Power BI - Visão Executiva](docs/evidence/powerbi/01-visao-executiva.png)
+
+---
+
+### Análise de Churn
+
+![Power BI - Análise de Churn](docs/evidence/powerbi/02-analise-churn.png)
+
+---
+
+### Risco e Retenção
+
+![Power BI - Risco e Retenção](docs/evidence/powerbi/03-risco-retencao.png)
+
+---
+
+### Perfil dos Clientes
+
+![Power BI - Perfil dos Clientes](docs/evidence/powerbi/04-perfil-clientes.png)
+
+---
+
+## Evidências disponíveis
+
+```text
+Streamlit: 17 screenshots
+Power BI:   4 screenshots
+Total:     21 screenshots
+```
+
+Estrutura:
+
+```text
+docs/evidence/
+├── streamlit/
+│   ├── 01-visao-geral/
+│   ├── 02-prever-novo-cliente/
+│   ├── 03-fila-retencao/
+│   ├── 04-modelos-explicabilidade/
+│   └── 05-sobre-projeto/
+│
+└── powerbi/
+    ├── 01-visao-executiva.png
+    ├── 02-analise-churn.png
+    ├── 03-risco-retencao.png
+    └── 04-perfil-clientes.png
+```
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="arquitetura-da-solucao"></a>
+
+# Arquitetura da solução
+
+```mermaid
+flowchart TD
+
+    A["IBM Telco Customer Churn<br/>7.043 clientes"]
+
+    B["Validação dos dados"]
+    C["Limpeza e preparação"]
+
+    D["Análise exploratória"]
+    E["Análise estatística"]
+
+    F["Preparação das variáveis"]
+
+    G["Separação Holdout<br/>80% desenvolvimento · 20% teste final"]
+
+    H["Conjunto de desenvolvimento<br/>5.634 clientes"]
+
+    I["Stratified 5-Fold<br/>Cross-Validation"]
+
+    J1["Logistic Regression"]
+    J2["Random Forest"]
+    J3["XGBoost"]
+
+    K["Comparação por<br/>ROC-AUC médio"]
+
+    L["Modelo selecionado<br/>Logistic Regression"]
+
+    M["Teste final preservado<br/>1.409 clientes"]
+
+    N["Avaliação final<br/>ROC-AUC 0,8481"]
+
+    O["Segmentação de risco"]
+
+    P1["LOW<br/>MONITOR"]
+    P2["MEDIUM<br/>ENGAGE"]
+    P3["HIGH<br/>URGENT"]
+
+    Q["Modelo operacional<br/>churn_model.joblib"]
+
+    R["Previsão individual"]
+
+    S["Explicabilidade"]
+
+    T["Streamlit"]
+    U["Power BI"]
+    V["SQL Analytics"]
+    W["Relatórios e evidências"]
+
+    A --> B
+    B --> C
+
+    C --> D
+    C --> E
+
+    D --> F
+    E --> F
+
+    F --> G
+
+    G --> H
+    H --> I
+
+    I --> J1
+    I --> J2
+    I --> J3
+
+    J1 --> K
+    J2 --> K
+    J3 --> K
+
+    K --> L
+
+    L --> M
+    M --> N
+
+    N --> O
+
+    O --> P1
+    O --> P2
+    O --> P3
+
+    L --> Q
+    Q --> R
+    R --> S
+
+    O --> T
+    O --> U
+    O --> V
+
+    S --> T
+
+    T --> W
+    U --> W
+    V --> W
+```
+
+### Interpretação da arquitetura
+
+A arquitetura separa explicitamente:
+
+1. exploração e preparação dos dados;
+2. desenvolvimento dos modelos;
+3. seleção por validação cruzada;
+4. avaliação independente no teste final;
+5. geração da inteligência de risco;
+6. previsão operacional;
+7. explicabilidade;
+8. visualização no Streamlit e Power BI;
+9. geração de relatórios e evidências.
+
+Essa separação reduz o risco de utilizar o conjunto final de teste durante a escolha do algoritmo.
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="dados-utilizados"></a>
+
+# Dados utilizados
+
+A base utilizada é a **IBM Telco Customer Churn**, composta por:
+
+```text
+7.043 clientes
+```
+
+A variável alvo é:
 
 ```text
 Churn
 ```
 
-### Variáveis numéricas
+## Perfil
+
+- gender;
+- SeniorCitizen;
+- Partner;
+- Dependents.
+
+## Relacionamento
+
+- tenure;
+- Contract.
+
+## Serviços
+
+- PhoneService;
+- MultipleLines;
+- InternetService;
+- OnlineSecurity;
+- OnlineBackup;
+- DeviceProtection;
+- TechSupport;
+- StreamingTV;
+- StreamingMovies.
+
+## Cobrança
+
+- PaperlessBilling;
+- PaymentMethod;
+- MonthlyCharges;
+- TotalCharges.
+
+---
+
+## Variáveis numéricas
 
 ```text
 SeniorCitizen
@@ -207,7 +444,7 @@ MonthlyCharges
 TotalCharges
 ```
 
-### Variáveis categóricas
+## Variáveis categóricas
 
 ```text
 gender
@@ -227,17 +464,21 @@ PaperlessBilling
 PaymentMethod
 ```
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Análise exploratória
+<a id="analise-exploratoria"></a>
 
-A análise histórica mostrou diferenças importantes entre alguns grupos de clientes.
+# Análise exploratória
 
-### Churn por tipo de contrato
+A análise histórica mostrou diferenças relevantes entre alguns grupos de clientes.
+
+## Churn por contrato
 
 | Contrato | Taxa de churn |
 |---|---:|
-| Month-to-month | **42,71%** |
+| **Month-to-month** | **42,71%** |
 | One year | 11,27% |
 | Two year | 2,83% |
 
@@ -245,32 +486,32 @@ Clientes com contrato mensal apresentaram a maior taxa histórica de churn entre
 
 ---
 
-### Churn por serviço de internet
+## Churn por serviço de internet
 
 | Serviço | Taxa de churn |
 |---|---:|
-| Fiber optic | **41,89%** |
+| **Fiber optic** | **41,89%** |
 | DSL | 18,96% |
 | No | 7,40% |
 
 ---
 
-### Churn por forma de pagamento
+## Churn por forma de pagamento
 
 | Forma de pagamento | Taxa de churn |
 |---|---:|
-| Electronic check | **45,29%** |
+| **Electronic check** | **45,29%** |
 | Mailed check | 19,11% |
 | Bank transfer (automatic) | 16,71% |
 | Credit card (automatic) | 15,24% |
 
 ---
 
-### Churn por tempo como cliente
+## Churn por tempo como cliente
 
 | Tempo de relacionamento | Taxa de churn |
 |---|---:|
-| 0 a 12 meses | **47,44%** |
+| **0 a 12 meses** | **47,44%** |
 | 13 a 24 meses | 28,71% |
 | 25 a 48 meses | 20,39% |
 | 49 a 72 meses | 9,51% |
@@ -279,7 +520,7 @@ Na base analisada, a taxa de churn diminui conforme aumenta o tempo de relaciona
 
 ---
 
-### Outros padrões observados
+## Outros padrões observados
 
 | Característica | Taxa de churn |
 |---|---:|
@@ -294,13 +535,17 @@ Na base analisada, a taxa de churn diminui conforme aumenta o tempo de relaciona
 | Sem parceiro | **32,96%** |
 | Com parceiro | 19,66% |
 
-Esses resultados representam **associações observadas na base** e não demonstram causalidade.
+> Esses resultados representam associações observadas na base e não demonstram causalidade.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Análise estatística
+<a id="analise-estatistica"></a>
 
-O projeto também utiliza testes estatísticos para complementar a análise visual.
+# Análise estatística
+
+O projeto utiliza testes estatísticos para complementar a análise exploratória.
 
 Foram aplicados:
 
@@ -311,23 +556,27 @@ Mann–Whitney U
 Tamanho de efeito
 ```
 
-Essa etapa ajuda a avaliar as diferenças e associações encontradas durante a exploração dos dados.
+Essa etapa ajuda a avaliar diferenças e associações identificadas durante a exploração dos dados.
 
 Os testes estatísticos não são utilizados para afirmar causalidade.
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Preparação dos dados
+<a id="preparacao-dos-dados"></a>
+
+# Preparação dos dados
 
 O pipeline utiliza tratamento separado para variáveis numéricas e categóricas.
 
-### Variáveis numéricas
+## Variáveis numéricas
 
 ```text
 StandardScaler
 ```
 
-### Variáveis categóricas
+## Variáveis categóricas
 
 ```text
 OneHotEncoder
@@ -335,23 +584,27 @@ OneHotEncoder
 
 O pré-processamento faz parte do pipeline do modelo.
 
-Isso ajuda a garantir que o mesmo processo utilizado durante o treinamento também seja aplicado durante a previsão de novos clientes.
+Isso garante que as mesmas transformações aplicadas durante o treinamento também sejam utilizadas na previsão de novos clientes.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Estratégia de validação da versão 1.1
+<a id="estrategia-de-validacao"></a>
 
-A versão 1.1 utiliza uma separação entre:
+# Estratégia de validação
+
+A versão 1.1 separa explicitamente:
 
 ```text
-desenvolvimento
-e
-teste final
+Desenvolvimento
+      +
+Teste final
 ```
 
-Primeiro, **20% da base é separado como conjunto de teste final**.
+## Holdout
 
-Esse conjunto não participa da escolha do algoritmo.
+Primeiro, 20% da base é reservado para avaliação final.
 
 ```text
 Base completa:       7.043 clientes
@@ -359,14 +612,20 @@ Desenvolvimento:     5.634 clientes
 Teste final:         1.409 clientes
 ```
 
-A separação do holdout utiliza:
+Configuração:
 
-```text
+```python
 test_size = 0.20
 random_state = 20260920
 ```
 
-Dentro do conjunto de desenvolvimento é realizada uma validação cruzada estratificada:
+O teste final não participa da escolha do algoritmo.
+
+---
+
+## Cross-validation
+
+Dentro dos 5.634 clientes do conjunto de desenvolvimento é utilizado:
 
 ```text
 StratifiedKFold
@@ -375,17 +634,21 @@ shuffle = True
 random_state = 42
 ```
 
-A métrica utilizada para selecionar o algoritmo é:
+A métrica utilizada para seleção é:
 
 ```text
 mean_cv_roc_auc
 ```
 
-Depois da seleção, o modelo escolhido é avaliado no conjunto de teste final preservado.
+Depois da seleção do algoritmo, o modelo escolhido é avaliado no teste final preservado.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Modelos avaliados
+<a id="modelos-avaliados"></a>
+
+# Modelos avaliados
 
 Foram comparados três algoritmos:
 
@@ -395,13 +658,21 @@ Random Forest
 XGBoost
 ```
 
-A comparação é realizada utilizando exatamente o mesmo conjunto de desenvolvimento e a mesma estratégia de validação cruzada.
+Todos utilizaram:
+
+- o mesmo conjunto de desenvolvimento;
+- o mesmo protocolo de validação cruzada;
+- a mesma métrica de seleção.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Resultados dos modelos
+<a id="resultados-dos-modelos"></a>
 
-### Validação cruzada
+# Resultados dos modelos
+
+## Validação cruzada
 
 | Modelo | Accuracy | Precision | Recall | F1 | ROC-AUC |
 |---|---:|---:|---:|---:|---:|
@@ -411,20 +682,32 @@ A comparação é realizada utilizando exatamente o mesmo conjunto de desenvolvi
 
 A **Logistic Regression apresentou o maior ROC-AUC médio na validação cruzada entre os três modelos avaliados**.
 
-O resultado completo da Logistic Regression foi:
+Resultado:
 
 ```text
 ROC-AUC médio = 0,8436
 Desvio padrão = 0,0066
 ```
 
-Por esse critério, ela foi selecionada para a avaliação final.
+Por esse critério, ela foi selecionada para avaliação no teste final.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Avaliação no teste final
+<a id="avaliacao-no-teste-final"></a>
 
-Após a seleção, a Logistic Regression foi avaliada nos **1.409 clientes reservados para teste final**.
+# Avaliação no teste final
+
+A Logistic Regression foi avaliada nos:
+
+```text
+1.409 clientes
+```
+
+reservados para o teste final.
+
+## Métricas
 
 | Métrica | Resultado |
 |---|---:|
@@ -434,7 +717,9 @@ Após a seleção, a Logistic Regression foi avaliada nos **1.409 clientes reser
 | F1 | **0,5872** |
 | ROC-AUC | **0,8481** |
 
-### Matriz de confusão
+---
+
+## Matriz de confusão
 
 | Resultado | Clientes |
 |---|---:|
@@ -445,11 +730,15 @@ Após a seleção, a Logistic Regression foi avaliada nos **1.409 clientes reser
 
 O conjunto de teste final não participou da seleção do algoritmo.
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Segmentação de risco
+<a id="segmentacao-de-risco"></a>
 
-Os **1.409 clientes do conjunto de teste** foram organizados em três níveis de risco.
+# Segmentação de risco
+
+Os **1.409 clientes** do conjunto final foram organizados em três níveis.
 
 | Risco | Clientes | Participação |
 |---|---:|---:|
@@ -458,7 +747,7 @@ Os **1.409 clientes do conjunto de teste** foram organizados em três níveis de
 | HIGH | **194** | **13,77%** |
 | **Total** | **1.409** | **100%** |
 
-### Limites utilizados
+## Limites utilizados
 
 ```text
 Probabilidade < 30%
@@ -471,29 +760,37 @@ Probabilidade ≥ 60%
 → HIGH
 ```
 
-Essas faixas são regras operacionais adotadas no projeto.
+Esses thresholds representam regras operacionais adotadas no projeto.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Prioridade de retenção
+<a id="prioridade-de-retencao"></a>
 
-Cada nível de risco recebe uma prioridade operacional.
+# Prioridade de retenção
+
+Cada faixa recebe uma prioridade operacional.
 
 | Risco | Prioridade | Interpretação |
 |---|---|---|
-| LOW | MONITOR | acompanhamento normal |
-| MEDIUM | ENGAGE | acompanhar e avaliar ações de relacionamento |
-| HIGH | URGENT | analisar primeiro |
+| LOW | **MONITOR** | acompanhamento normal |
+| MEDIUM | **ENGAGE** | avaliar ações de relacionamento |
+| HIGH | **URGENT** | analisar primeiro |
 
-O objetivo é transformar uma probabilidade produzida pelo modelo em uma informação mais fácil de utilizar.
+O objetivo é transformar uma probabilidade produzida pelo modelo em uma informação mais fácil de utilizar operacionalmente.
 
 A classificação não significa que o cliente obrigatoriamente cancelará o serviço.
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Previsão e comportamento observado
+<a id="previsao-x-observado"></a>
 
-No conjunto de teste, também foi comparada a probabilidade média prevista com a taxa de churn observada dentro de cada faixa.
+# Previsão x comportamento observado
+
+No conjunto de teste também foi comparada a probabilidade média prevista com a taxa de churn observada.
 
 | Risco | Probabilidade média prevista | Churn observado |
 |---|---:|---:|
@@ -501,17 +798,19 @@ No conjunto de teste, também foi comparada a probabilidade média prevista com 
 | MEDIUM | **45,41%** | **45,13%** |
 | LOW | **9,62%** | **9,70%** |
 
-As médias ficaram próximas das taxas observadas nas três faixas analisadas.
+As médias ficaram próximas das taxas observadas dentro das três faixas analisadas.
 
-Essa comparação é descritiva e **não substitui uma avaliação formal de calibração das probabilidades**.
+> Essa comparação é descritiva e não substitui uma avaliação formal de calibração das probabilidades.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Previsão de novos clientes
+<a id="previsao-novos-clientes"></a>
 
-A versão 1.1 adiciona uma funcionalidade para calcular o risco de churn de um novo cliente diretamente na aplicação Streamlit.
+# Previsão de novos clientes
 
-O usuário informa as características do cliente no formulário.
+A aplicação Streamlit permite estimar o risco de churn de um novo cliente.
 
 Entre os dados utilizados estão:
 
@@ -537,7 +836,7 @@ Cobrança mensal
 Total acumulado
 ```
 
-Após o envio, o sistema apresenta:
+Após o envio, a aplicação apresenta:
 
 ```text
 Probabilidade estimada de churn
@@ -548,53 +847,69 @@ Fatores que reduziram a estimativa
 Orientação operacional
 ```
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Modelo operacional
+<a id="modelo-operacional"></a>
 
-O modelo utilizado para previsão de novos clientes é persistido em:
+# Modelo operacional
+
+O modelo utilizado pela aplicação é persistido em:
 
 ```text
 artifacts/churn_model.joblib
 ```
 
-O artefato contém o pipeline necessário para realizar o pré-processamento e a previsão.
+O artefato contém o pipeline necessário para realizar:
 
-Para gerar novamente o modelo operacional:
+```text
+pré-processamento
++
+previsão
+```
+
+Para gerar novamente o modelo:
 
 ```powershell
 python scripts/train_churn_model.py
 ```
 
-Após a seleção e avaliação do algoritmo, o artefato operacional é treinado com os dados disponíveis para utilização na aplicação.
+Após a seleção e avaliação do algoritmo, o artefato operacional é treinado para utilização pela aplicação.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Explicação individual da previsão
+<a id="explicabilidade"></a>
 
-A previsão individual utiliza uma explicação compatível com a **Logistic Regression**, o mesmo algoritmo utilizado para gerar a probabilidade apresentada ao usuário.
+# Explicabilidade
 
-Para cada variável, é calculada sua contribuição para o score da previsão.
+O projeto mantém duas camadas diferentes de interpretação.
+
+## Explicação individual
+
+A previsão individual utiliza uma explicação compatível com a **Logistic Regression**, o mesmo algoritmo responsável pela probabilidade apresentada ao usuário.
 
 De forma simplificada:
 
 ```text
 Valor transformado
-       ×
+        ×
 Coeficiente aprendido
-       =
+        =
 Contribuição da variável
 ```
 
 A aplicação organiza os resultados em:
 
 ```text
-Sinais que aumentaram o risco estimado
+Fatores que aumentaram o risco estimado
 
-Sinais que reduziram o risco estimado
+Fatores que reduziram o risco estimado
 ```
 
-Também é possível consultar informações técnicas mais detalhadas sobre:
+Também são disponibilizadas informações técnicas como:
 
 ```text
 valor transformado
@@ -604,7 +919,7 @@ intercepto
 decision score
 ```
 
-A explicação mostra como o modelo chegou ao resultado.
+Essa explicação mostra como o modelo chegou ao resultado.
 
 Ela não significa que determinada característica causou o comportamento do cliente.
 
@@ -612,9 +927,13 @@ Ela não significa que determinada característica causou o comportamento do cli
 
 ## Explicabilidade global
 
-O projeto também mantém análises de explicabilidade global utilizando **SHAP** nas análises de referência.
+O projeto também mantém análises globais de referência utilizando:
 
-Dessa forma, existem duas camadas diferentes de interpretação:
+```text
+SHAP
+```
+
+Assim:
 
 ```text
 Visão global
@@ -624,84 +943,99 @@ Previsão individual
 → contribuições da Logistic Regression
 ```
 
-Isso evita utilizar a explicação de um algoritmo diferente para justificar uma previsão individual.
+Isso evita utilizar a explicação de outro algoritmo para justificar a previsão individual.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Streamlit
+<a id="aplicacao-streamlit"></a>
 
-A aplicação Streamlit organiza o projeto em diferentes páginas.
+# Aplicação Streamlit
 
-### Visão Geral
+A aplicação está organizada em cinco áreas.
 
-Apresenta informações como:
-
-- indicadores gerais da base;
-- comportamento histórico do churn;
-- análise exploratória;
-- resultados estatísticos;
-- informações gerais do projeto.
-
----
-
-### Modelos
+## 1. Visão Geral
 
 Apresenta:
 
-- estratégia de validação;
-- comparação dos três modelos;
-- resultados da validação cruzada;
-- modelo selecionado;
-- métricas do teste final;
-- explicação das principais métricas.
+- indicadores gerais;
+- churn histórico;
+- segmentação de risco;
+- padrões de negócio;
+- informações do modelo;
+- orientação de navegação.
 
 ---
 
-### Fila de Retenção
+## 2. Prever Novo Cliente
 
-A fila utiliza os clientes do conjunto de teste e permite:
+Permite:
+
+- preencher os dados do cliente;
+- calcular a probabilidade de churn;
+- definir nível de risco;
+- definir prioridade;
+- visualizar fatores associados à previsão;
+- consultar informações técnicas.
+
+---
+
+## 3. Fila de Retenção
+
+Permite:
 
 - visualizar clientes por risco;
-- filtrar por nível de risco;
-- filtrar por contrato;
-- pesquisar pelo identificador do cliente;
-- ordenar pela probabilidade estimada;
+- filtrar nível de risco;
+- filtrar contrato;
+- pesquisar identificador;
+- ordenar pela probabilidade;
 - visualizar informações do perfil;
-- exportar os clientes filtrados em CSV.
+- exportar resultados em CSV.
 
 A lista começa pelos clientes com maior probabilidade estimada dentro dos filtros selecionados.
 
 ---
 
-### Prever Novo Cliente
+## 4. Modelos e Explicabilidade
 
-Permite:
+Organiza informações sobre:
 
-- preencher os dados de um novo cliente;
-- calcular a probabilidade de churn;
-- classificar o nível de risco;
-- definir a prioridade operacional;
-- visualizar os principais fatores associados à previsão;
-- consultar detalhes técnicos da explicação.
-
----
-
-### Sobre
-
-Apresenta informações sobre:
-
-- objetivo do projeto;
-- escopo;
-- tecnologias;
-- interpretação das previsões;
-- limitações;
-- uso responsável dos resultados.
+```text
+Resultado para negócio
+Validação
+Teste final
+Explicabilidade
+Configuração
+```
 
 ---
 
-## Power BI
+## 5. Sobre o Projeto
 
-A versão 1.1 inclui um dashboard completo desenvolvido em **Power BI**.
+Apresenta:
+
+```text
+Problema
+Dados
+Modelo
+Ação
+Metodologia
+Validação
+Explicabilidade
+Tecnologias
+Limitações
+```
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="dashboard-powerbi"></a>
+
+# Dashboard Power BI
+
+O projeto inclui um dashboard completo desenvolvido em Power BI.
 
 Arquivo:
 
@@ -709,13 +1043,13 @@ Arquivo:
 dashboards/powerbi/Customer-Churn-Analytics-V1.1.pbix
 ```
 
-O dashboard está dividido em quatro páginas.
+O dashboard possui quatro páginas.
 
 ---
 
-### 1. Visão Executiva
+## 1. Visão Executiva
 
-Apresenta os principais indicadores:
+Apresenta:
 
 ```text
 Total de clientes
@@ -726,19 +1060,19 @@ Médio risco
 Baixo risco
 ```
 
-Também apresenta churn por:
+Além de análises de churn por:
 
 ```text
-Tipo de contrato
+Contrato
 Serviço de internet
 Forma de pagamento
 ```
 
 ---
 
-### 2. Análise de Churn
+## 2. Análise de Churn
 
-Apresenta a taxa histórica de churn por:
+Apresenta churn por:
 
 ```text
 Tempo como cliente
@@ -751,24 +1085,24 @@ Parceiro
 
 ---
 
-### 3. Risco e Retenção
+## 3. Risco e Retenção
 
 Apresenta:
 
 ```text
 Distribuição dos clientes por risco
-Churn observado por nível de risco
+Churn observado por risco
 Prioridade de retenção
 Probabilidade média prevista
-Risco por tipo de contrato
+Risco por contrato
 Risco por serviço de internet
 ```
 
 ---
 
-### 4. Perfil dos Clientes
+## 4. Perfil dos Clientes
 
-Apresenta informações sobre:
+Apresenta:
 
 ```text
 Gênero
@@ -779,39 +1113,43 @@ Tempo como cliente
 Tipo de contrato
 ```
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Perfil da base
+<a id="perfil-da-base"></a>
 
-### Gênero
+# Perfil da base
+
+## Gênero
 
 | Grupo | Participação |
 |---|---:|
 | Male | 50,48% |
 | Female | 49,52% |
 
-### Dependentes
+## Dependentes
 
 | Grupo | Participação |
 |---|---:|
 | No | 70,04% |
 | Yes | 29,96% |
 
-### Parceiro
+## Parceiro
 
 | Grupo | Participação |
 |---|---:|
 | No | 51,70% |
 | Yes | 48,30% |
 
-### Cliente idoso
+## Cliente idoso
 
 | Grupo | Participação |
 |---|---:|
 | Não | 83,79% |
 | Sim | 16,21% |
 
-### Tempo como cliente
+## Tempo como cliente
 
 | Faixa | Clientes |
 |---|---:|
@@ -820,7 +1158,7 @@ Tipo de contrato
 | 25 a 48 meses | 1.594 |
 | 49 a 72 meses | 2.239 |
 
-### Tipo de contrato
+## Tipo de contrato
 
 | Contrato | Clientes |
 |---|---:|
@@ -828,13 +1166,17 @@ Tipo de contrato
 | Two year | 1.695 |
 | One year | 1.473 |
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## SQL
+<a id="sql-analytics"></a>
 
-O projeto também utiliza **SQLite** para consultas analíticas.
+# SQL Analytics
 
-Para executar as análises:
+O projeto utiliza **SQLite** para consultas analíticas.
+
+Para executar:
 
 ```powershell
 python scripts/run_churn_sql_analytics.py
@@ -846,63 +1188,15 @@ Os relatórios produzidos são armazenados em:
 reports/
 ```
 
-As consultas complementam as análises realizadas em Python e Power BI.
+As consultas complementam as análises realizadas em Python, Streamlit e Power BI.
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Arquitetura da solução
+<a id="tecnologias"></a>
 
-```text
-              IBM Telco Customer Churn
-                         │
-                         ▼
-                 Validação dos dados
-                         │
-                         ▼
-                Limpeza e preparação
-                         │
-             ┌───────────┴───────────┐
-             ▼                       ▼
-      Análise exploratória     Análise estatística
-             │                       │
-             └───────────┬───────────┘
-                         ▼
-                 Preparação dos dados
-                         │
-                         ▼
-                Separação do holdout
-                         │
-                         ▼
-                Validação cruzada
-                         │
-       ┌─────────────────┼─────────────────┐
-       ▼                 ▼                 ▼
-Logistic Regression  Random Forest      XGBoost
-       │                 │                 │
-       └─────────────────┼─────────────────┘
-                         ▼
-                 Seleção do modelo
-                         │
-                         ▼
-                 Teste final preservado
-                         │
-                         ▼
-                Segmentação de risco
-                         │
-             ┌───────────┴───────────┐
-             ▼                       ▼
-         Streamlit                Power BI
-             │
-             ▼
-      Previsão individual
-             │
-             ▼
-     Explicação da previsão
-```
-
----
-
-## Tecnologias
+# Tecnologias
 
 | Área | Tecnologias |
 |---|---|
@@ -914,157 +1208,24 @@ Logistic Regression  Random Forest      XGBoost
 | Aplicação | Streamlit |
 | Consultas | SQLite |
 | Business Intelligence | Power BI, DAX |
+| Persistência | Joblib |
 | Testes | Pytest |
 | Qualidade | Ruff |
-| Persistência do modelo | Joblib |
 | Versionamento | Git, GitHub |
 
----
-
-## Como executar
-
-### Pré-requisitos
-
-```text
-Git
-Python 3.11 ou superior
-```
-
-A validação final da versão 1.1 foi realizada utilizando:
-
-```text
-Python 3.12.1
-```
+[↑ Voltar ao índice](#indice)
 
 ---
 
-### 1. Clonar o repositório
+<a id="estrutura-do-projeto"></a>
 
-```powershell
-git clone https://github.com/Rogerio5/Customer-Churn-Analytics.git
-cd Customer-Churn-Analytics
-```
-
----
-
-### 2. Criar o ambiente virtual
-
-```powershell
-python -m venv .venv
-```
-
----
-
-### 3. Ativar o ambiente no Windows
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
----
-
-### 4. Instalar as dependências
-
-```powershell
-python -m pip install -e ".[dev]"
-```
-
----
-
-### 5. Executar a aplicação
-
-```powershell
-python -m streamlit run app.py
-```
-
-O endereço local normalmente será:
-
-```text
-http://localhost:8501
-```
-
----
-
-## Comandos principais
-
-### Selecionar o modelo com validação cruzada
-
-```powershell
-python scripts/select_churn_model_cv.py
-```
-
-Esse script compara os modelos utilizando a base de desenvolvimento e registra os resultados da validação cruzada.
-
----
-
-### Construir a inteligência de retenção
-
-```powershell
-python scripts/build_churn_retention_v1_1.py
-```
-
-Esse processo gera os dados utilizados para:
-
-```text
-probabilidade de churn
-nível de risco
-prioridade de retenção
-Power BI
-fila de retenção
-```
-
----
-
-### Treinar o modelo operacional
-
-```powershell
-python scripts/train_churn_model.py
-```
-
-O modelo é salvo em:
-
-```text
-artifacts/churn_model.joblib
-```
-
----
-
-### Executar análises SQL
-
-```powershell
-python scripts/run_churn_sql_analytics.py
-```
-
----
-
-### Executar todos os testes
-
-```powershell
-python -m pytest -q
-```
-
----
-
-### Verificar qualidade do código
-
-```powershell
-python -m ruff check .
-```
-
----
-
-### Verificar compilação
-
-```powershell
-python -m compileall app.py scripts src/customer_churn tests -q
-```
-
----
-
-## Estrutura do projeto
+# Estrutura do projeto
 
 ```text
 Customer-Churn-Analytics/
+│
+├── .streamlit/
+│   └── config.toml
 │
 ├── app.py
 │
@@ -1082,6 +1243,22 @@ Customer-Churn-Analytics/
 │   └── processed/
 │
 ├── docs/
+│   ├── validation.md
+│   │
+│   └── evidence/
+│       │
+│       ├── streamlit/
+│       │   ├── 01-visao-geral/
+│       │   ├── 02-prever-novo-cliente/
+│       │   ├── 03-fila-retencao/
+│       │   ├── 04-modelos-explicabilidade/
+│       │   └── 05-sobre-projeto/
+│       │
+│       └── powerbi/
+│           ├── 01-visao-executiva.png
+│           ├── 02-analise-churn.png
+│           ├── 03-risco-retencao.png
+│           └── 04-perfil-clientes.png
 │
 ├── reports/
 │   ├── churn_cv_model_comparison.csv
@@ -1099,14 +1276,18 @@ Customer-Churn-Analytics/
 ├── src/
 │   └── customer_churn/
 │       ├── analytics/
+│       │
 │       ├── dashboard/
 │       │   ├── about_view.py
 │       │   ├── churn_view.py
 │       │   ├── models_view.py
 │       │   ├── predict_view.py
-│       │   └── retention_view.py
+│       │   ├── retention_view.py
+│       │   └── ui_style.py
+│       │
 │       ├── data/
 │       ├── features/
+│       │
 │       └── models/
 │           └── logistic_explainability.py
 │
@@ -1120,45 +1301,257 @@ Customer-Churn-Analytics/
 └── README.md
 ```
 
+[↑ Voltar ao índice](#indice)
+
 ---
 
-## Validação da versão 1.1
+<a id="como-executar"></a>
 
-A validação final foi realizada em **22/09/2026**.
+# Como executar
 
-### Ambiente
+## Pré-requisitos
+
+```text
+Git
+Python 3.11 ou superior
+```
+
+A validação atual foi realizada utilizando:
 
 ```text
 Python 3.12.1
 ```
 
-### Compilação
+---
 
-```text
-PASS
+## 1. Clonar o repositório
+
+```powershell
+git clone https://github.com/Rogerio5/Customer-Churn-Analytics.git
+cd Customer-Churn-Analytics
 ```
 
-### Ruff
+---
+
+## 2. Criar o ambiente virtual
+
+```powershell
+python -m venv .venv
+```
+
+---
+
+## 3. Ativar no Windows
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+---
+
+## 4. Instalar as dependências
+
+```powershell
+python -m pip install -e ".[dev]"
+```
+
+---
+
+## 5. Executar a aplicação
+
+```powershell
+python -m streamlit run app.py
+```
+
+Endereço local padrão:
+
+```text
+http://localhost:8501
+```
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="comandos-principais"></a>
+
+# Comandos principais
+
+## Selecionar modelo
+
+```powershell
+python scripts/select_churn_model_cv.py
+```
+
+---
+
+## Construir inteligência de retenção
+
+```powershell
+python scripts/build_churn_retention_v1_1.py
+```
+
+---
+
+## Treinar modelo operacional
+
+```powershell
+python scripts/train_churn_model.py
+```
+
+---
+
+## Executar SQL Analytics
+
+```powershell
+python scripts/run_churn_sql_analytics.py
+```
+
+---
+
+## Executar testes
+
+```powershell
+python -m pytest -q
+```
+
+---
+
+## Verificar Ruff
+
+```powershell
+python -m ruff check .
+```
+
+---
+
+## Verificar compilação
+
+```powershell
+python -m compileall app.py scripts src/customer_churn tests -q
+```
+
+---
+
+## Verificar diferenças do Git
+
+```powershell
+git diff --check
+```
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="validacao"></a>
+
+# Validação
+
+## Ambiente
+
+```text
+Python 3.12.1
+```
+
+## Ruff
 
 ```text
 All checks passed!
 ```
 
-### Pytest
+## Pytest
 
 ```text
 152 passed
 ```
 
-### Resultado final
+## Compile
 
 ```text
-V1_1_FINAL_VALIDATION=PASS
+PASS
 ```
+
+## Git diff check
+
+```text
+PASS
+```
+
+## Evidências
+
+```text
+Streamlit: 17 PNG
+Power BI:   4 PNG
+Total:     21 PNG
+```
+
+## Resultado
+
+```text
+VALIDATION=PASS
+```
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Testes adicionados na versão 1.1
+<a id="rastreabilidade"></a>
+
+# Rastreabilidade
+
+Os principais resultados apresentados no projeto são armazenados em arquivos próprios.
+
+## Comparação por validação cruzada
+
+```text
+reports/churn_cv_model_comparison.csv
+```
+
+## Avaliação final
+
+```text
+reports/churn_final_test_evaluation.csv
+```
+
+## Seleção e configuração
+
+```text
+reports/churn_model_selection_v1_1.json
+```
+
+## Modelo operacional
+
+```text
+artifacts/churn_model.joblib
+```
+
+## Dashboard Power BI
+
+```text
+dashboards/powerbi/Customer-Churn-Analytics-V1.1.pbix
+```
+
+## Evidências
+
+```text
+docs/evidence/
+```
+
+Essa estrutura permite conferir os números, artefatos e telas apresentados no projeto.
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="testes-automatizados"></a>
+
+# Testes automatizados
+
+A suíte atual possui:
+
+```text
+152 testes aprovados
+```
 
 A versão 1.1 adicionou **18 testes específicos** relacionados às novas funcionalidades.
 
@@ -1169,7 +1562,7 @@ Humanização das variáveis
 Organização dos fatores positivos
 Organização dos fatores negativos
 Construção das tabelas de contribuição
-Textos de orientação operacional
+Orientação operacional
 Explicação da Logistic Regression
 Reconstrução do decision score
 Validação de uma única linha por explicação
@@ -1177,79 +1570,82 @@ Carregamento do modelo persistido
 Probabilidade entre 0 e 1
 Confirmação da Logistic Regression
 Distribuição da fila de retenção
-Limites de LOW
-Limites de MEDIUM
-Limites de HIGH
-Mapeamento LOW → MONITOR
-Mapeamento MEDIUM → ENGAGE
-Mapeamento HIGH → URGENT
+Limites LOW
+Limites MEDIUM
+Limites HIGH
+LOW → MONITOR
+MEDIUM → ENGAGE
+HIGH → URGENT
 ```
 
-A suíte completa passou de **134 para 152 testes**.
+A suíte completa passou de:
+
+```text
+134
+```
+
+para:
+
+```text
+152 testes
+```
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Rastreabilidade dos resultados
+<a id="entregas"></a>
 
-Os principais resultados utilizados no projeto são registrados em arquivos próprios.
-
-### Comparação por validação cruzada
-
-```text
-reports/churn_cv_model_comparison.csv
-```
-
-### Avaliação no teste final
-
-```text
-reports/churn_final_test_evaluation.csv
-```
-
-### Modelo selecionado e configuração
-
-```text
-reports/churn_model_selection_v1_1.json
-```
-
-Esses arquivos permitem conferir os números apresentados no projeto.
-
----
-
-## Entregas
-
-O projeto possui diferentes formas de apresentação dos resultados.
+# Entregas
 
 | Entrega | Objetivo |
 |---|---|
 | Python | análise, preparação e modelagem |
 | Machine Learning | estimativa de risco de churn |
-| Streamlit | exploração e previsão individual |
+| Streamlit | exploração, operação e previsão individual |
 | Power BI | acompanhamento visual e gerencial |
 | SQL | consultas analíticas |
 | Explicabilidade | compreensão das previsões |
 | Fila de retenção | priorização operacional |
-| Relatório | documentação estruturada do trabalho |
+| Modelo persistido | utilização pela aplicação |
+| Testes automatizados | validação técnica |
+| Evidências | rastreabilidade visual |
+| Relatórios | rastreabilidade dos resultados |
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Limitações
+<a id="limitacoes"></a>
+
+# Limitações
 
 Os resultados devem ser interpretados dentro do contexto do projeto.
 
 A base utilizada é pública e representa um cenário específico de telecomunicações.
 
-As relações observadas entre características e churn representam associações e não comprovam causalidade.
+As relações encontradas entre características e churn representam:
 
-Os limites de:
+```text
+associações
+```
+
+e não comprovam:
+
+```text
+causalidade
+```
+
+Os limites:
 
 ```text
 30%
 60%
 ```
 
-utilizados para definir os níveis de risco são regras operacionais de referência.
+utilizados para definir LOW, MEDIUM e HIGH são regras operacionais adotadas no projeto.
 
-O projeto ainda não utiliza informações reais sobre:
+O projeto não utiliza informações reais sobre:
 
 ```text
 custo de retenção
@@ -1260,32 +1656,27 @@ valor de campanha
 retorno financeiro
 ```
 
-A proximidade entre a probabilidade média prevista e o churn observado nas faixas de risco não substitui uma avaliação formal de calibração.
+A proximidade entre probabilidade média prevista e churn observado nas faixas de risco não substitui uma avaliação formal de calibração.
 
-Em um ambiente de produção, o modelo também precisaria ser acompanhado ao longo do tempo para identificar possíveis mudanças no comportamento dos dados.
+Em um ambiente de produção também seria necessário acompanhar:
 
----
+```text
+desempenho do modelo
+mudanças na distribuição dos dados
+qualidade dos dados
+calibração
+resultado das ações de retenção
+```
 
-## Próximas evoluções
-
-- [ ] Configurar integração contínua com GitHub Actions.
-- [ ] Adicionar imagens reais do Streamlit ao README.
-- [ ] Adicionar imagens reais do Power BI ao README.
-- [ ] Criar uma capa visual utilizando telas reais do projeto.
-- [ ] Publicar uma demonstração online do Streamlit.
-- [ ] Avaliar formalmente a calibração das probabilidades.
-- [ ] Analisar custo de falsos positivos e falsos negativos.
-- [ ] Avaliar diferentes limites de classificação de risco.
-- [ ] Adicionar monitoramento de desempenho do modelo.
-- [ ] Adicionar monitoramento de mudanças nos dados.
-- [ ] Estudar integração com sistemas de relacionamento com clientes.
-- [ ] Avaliar experimentos de retenção e acompanhamento de resultados.
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Uso responsável dos resultados
+<a id="uso-responsavel"></a>
 
-Uma probabilidade elevada de churn significa que, segundo os padrões aprendidos pelo modelo, aquele cliente apresenta maior risco estimado.
+# Uso responsável
+
+Uma probabilidade elevada de churn significa que, segundo os padrões aprendidos pelo modelo, aquele cliente apresenta maior **risco estimado**.
 
 Isso não significa:
 
@@ -1293,7 +1684,7 @@ Isso não significa:
 que o cliente certamente irá cancelar
 ```
 
-Da mesma forma, uma variável que aumentou a previsão não deve ser interpretada automaticamente como a causa do cancelamento.
+Da mesma forma, uma variável que aumentou a previsão não deve ser automaticamente interpretada como causa do cancelamento.
 
 O objetivo da solução é:
 
@@ -1301,20 +1692,89 @@ O objetivo da solução é:
 apoiar a tomada de decisão
 ```
 
-e não substituir a análise humana.
+e não:
+
+```text
+substituir a análise humana
+```
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Autor
+<a id="proximas-evolucoes"></a>
+
+# Próximas evoluções
+
+- [ ] Configurar integração contínua com GitHub Actions.
+- [x] Organizar imagens reais do Streamlit.
+- [x] Organizar imagens reais do Power BI.
+- [x] Criar estrutura de evidências.
+- [x] Adicionar evidências visuais ao README.
+- [ ] Publicar demonstração online do Streamlit.
+- [ ] Avaliar formalmente a calibração das probabilidades.
+- [ ] Analisar custo de falsos positivos e falsos negativos.
+- [ ] Avaliar diferentes thresholds de classificação.
+- [ ] Incorporar métricas financeiras de retenção.
+- [ ] Adicionar monitoramento de desempenho do modelo.
+- [ ] Adicionar monitoramento de mudanças nos dados.
+- [ ] Estudar integração com CRM.
+- [ ] Avaliar experimentos de retenção e acompanhamento dos resultados.
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="origem-e-evolucao"></a>
+
+# Origem e evolução
+
+Este repositório representa uma evolução do projeto **Customer Churn Analytics**, com ampliação das etapas de:
+
+```text
+análise exploratória
+estatística
+Machine Learning
+validação
+explicabilidade
+segmentação de risco
+retenção
+Streamlit
+Power BI
+SQL
+testes
+documentação
+evidências
+```
+
+A evolução mantém rastreabilidade dos artefatos, métricas e resultados utilizados na solução.
+
+[↑ Voltar ao índice](#indice)
+
+---
+
+<a id="autor"></a>
+
+# Autor
 
 **Rogério Augusto Sabino**
 
 Projeto desenvolvido como aplicação prática de:
 
-**Análise de Dados · Machine Learning · Explicabilidade · SQL · Streamlit · Power BI**
+**Análise de Dados · Machine Learning · Customer Analytics · Explainable AI · SQL · Streamlit · Power BI**
+
+[↑ Voltar ao índice](#indice)
 
 ---
 
-## Licença
+<a id="licenca"></a>
+
+# Licença
 
 Este projeto é distribuído sob a licença [MIT](LICENSE).
+
+---
+
+**Customer Churn Analytics · Versão 1.1**
+
+[↑ Voltar ao índice](#indice)
