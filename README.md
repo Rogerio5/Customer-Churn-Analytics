@@ -8,7 +8,7 @@ O projeto utiliza a base **IBM Telco Customer Churn** para investigar padrões h
 
 > **Pergunta de negócio:** quais clientes apresentam maior risco estimado de cancelar o serviço e como organizar a priorização das ações de retenção?
 
-**Versão 1.1** · **Python 3.12.1** · **Streamlit** · **Power BI** · **Licença MIT**
+**Aplicação 1.2.0** · **Modelo ML v1.1** · **Python 3.12.1** · **Streamlit** · **Power BI** · **Licença MIT**
 
 ---
 
@@ -1775,6 +1775,6 @@ Este projeto é distribuído sob a licença [MIT](LICENSE).
 
 ---
 
-**Customer Churn Analytics · Versão 1.1**
+**Customer Churn Analytics · Aplicação v1.2.0 · Modelo ML v1.1**
 
 [↑ Voltar ao índice](#indice)

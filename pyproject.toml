@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "customer-churn-analytics"
-version = "1.1.0"
+version = "1.2.0"
 description = "Standalone Customer Churn analytics, prediction and retention intelligence."
 requires-python = ">=3.11"
 
