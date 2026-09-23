@@ -55,346 +55,171 @@ def render_simple_view(
     selection,
 ):
     customers = len(data)
+    churned = int((data["Churn"] == "Yes").sum())
+    churn_rate = churned / customers * 100
 
-    churned = int(
-        (data["Churn"] == "Yes").sum()
-    )
-
-    churn_rate = (
-        churned
-        / customers
-        * 100
-    )
-
-    low = int(
-        (bi["risk_level"] == "LOW").sum()
-    )
-
-    medium = int(
-        (bi["risk_level"] == "MEDIUM").sum()
-    )
-
-    high = int(
-        (bi["risk_level"] == "HIGH").sum()
-    )
+    low = int((bi["risk_level"] == "LOW").sum())
+    medium = int((bi["risk_level"] == "MEDIUM").sum())
+    high = int((bi["risk_level"] == "HIGH").sum())
 
     final_row = final.iloc[0]
+    final_auc = float(final_row["roc_auc"])
 
-    st.subheader(
-        "Entenda o projeto"
+    # --------------------------------------------------------
+    # Resumo do projeto
+    # --------------------------------------------------------
+
+    p1, p2, p3, p4 = st.columns(
+        4,
+        gap="small",
     )
 
-    st.caption(
-        "Esta aba explica a solução sem exigir "
-        "conhecimento de Machine Learning."
+    with p1, st.container(border=True):
+        st.markdown("##### 🎯 Problema")
+        st.caption(
+            "Identificar clientes com maior risco "
+            "estimado de churn."
+        )
+
+    with p2, st.container(border=True):
+        st.markdown("##### 🗂️ Dados")
+        st.caption(
+            f"{customers:,} clientes com perfil, "
+            "serviços e cobrança."
+        )
+
+    with p3, st.container(border=True):
+        st.markdown("##### 🤖 Modelo")
+        st.caption(
+            "Logistic Regression selecionada "
+            "por cross-validation."
+        )
+
+    with p4, st.container(border=True):
+        st.markdown("##### 👥 Ação")
+        st.caption(
+            "Priorizar clientes para retenção."
+        )
+
+    # --------------------------------------------------------
+    # KPIs compactos
+    # --------------------------------------------------------
+
+    k1, k2, k3, k4 = st.columns(
+        4,
+        gap="small",
     )
 
-    with st.container(border=True):
-        st.markdown(
-            """
-### 🎯 Qual problema queremos resolver?
-
-Quando um cliente deixa de utilizar um serviço ou cancela
-seu contrato, temos um caso de **churn**.
-
-Para uma empresa, identificar clientes que apresentam maior
-risco de cancelamento pode ajudar a organizar o trabalho
-da equipe de retenção.
-
-Este projeto utiliza dados históricos e Machine Learning para
-responder à pergunta:
-
-> **Quais clientes apresentam maior risco estimado de churn?**
-
-O sistema não afirma que um cliente irá cancelar com certeza.
-
-Ele gera uma **estimativa de risco** para ajudar na priorização
-e análise dos clientes.
-"""
-        )
-
-    st.markdown(
-        "### O que significa churn?"
-    )
-
-    left, right = st.columns(2)
-
-    with left, st.container(border=True):
-        st.markdown(
-            "### ✅ Não churn"
-        )
-
-        st.write(
-            "O cliente continua utilizando "
-            "o serviço."
-        )
-
-    with right, st.container(border=True):
-        st.markdown(
-            "### ⚠️ Churn"
-        )
-
-        st.write(
-            "O cliente deixou de utilizar "
-            "ou cancelou o serviço."
-        )
-
-    st.divider()
-
-    st.subheader(
-        "O que existe na base de dados?"
-    )
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    c1.metric(
+    k1.metric(
         "Clientes",
-        f"{customers:,}",
+        f"{customers:,}".replace(",", "."),
     )
 
-    c2.metric(
-        "Clientes com churn",
-        f"{churned:,}",
+    k2.metric(
+        "Churn",
+        f"{churned:,}".replace(",", "."),
     )
 
-    c3.metric(
+    k3.metric(
         "Taxa de churn",
-        f"{churn_rate:.2f}%",
+        f"{churn_rate:.2f}%".replace(".", ","),
     )
 
-    c4.metric(
-        "Teste final",
-        f'{selection["final_test_rows"]:,}',
+    k4.metric(
+        "ROC-AUC",
+        f"{final_auc:.4f}",
     )
 
-    st.caption(
-        "A taxa de churn acima descreve este dataset. "
-        "Ela não deve ser generalizada automaticamente "
-        "para outras empresas."
+    # --------------------------------------------------------
+    # Abas compactas
+    # --------------------------------------------------------
+
+    flow_tab, risk_tab, navigation_tab = st.tabs(
+        [
+            "🔄 Como funciona",
+            "🚦 Risco",
+            "🧭 Navegação",
+        ]
     )
 
-    st.divider()
-
-    st.subheader(
-        "Como a solução funciona?"
-    )
-
-    s1, s2, s3, s4 = st.columns(4)
-
-    with s1, st.container(border=True):
-        st.markdown("### 1️⃣ Dados")
-        st.write(
-            "Recebemos informações do cliente, "
-            "contrato, serviços e cobranças."
+    with flow_tab:
+        s1, s2, s3, s4 = st.columns(
+            4,
+            gap="small",
         )
 
-    with s2, st.container(border=True):
-        st.markdown("### 2️⃣ Modelo")
-        st.write(
-            "O modelo procura padrões aprendidos "
-            "nos dados históricos."
+        with s1, st.container(border=True):
+            st.markdown("##### 1️⃣ Dados")
+            st.caption("Perfil e serviços")
+
+        with s2, st.container(border=True):
+            st.markdown("##### 2️⃣ Modelo")
+            st.caption("Machine Learning")
+
+        with s3, st.container(border=True):
+            st.markdown("##### 3️⃣ Risco")
+            st.caption("LOW · MEDIUM · HIGH")
+
+        with s4, st.container(border=True):
+            st.markdown("##### 4️⃣ Prioridade")
+            st.caption("MONITOR · ENGAGE · URGENT")
+
+        st.caption(
+            "A previsão estima risco; não determina "
+            "que o cliente irá cancelar."
         )
 
-    with s3, st.container(border=True):
-        st.markdown("### 3️⃣ Risco")
-        st.write(
-            "É calculada uma probabilidade "
-            "estimada de churn."
+    with risk_tab:
+        r1, r2, r3 = st.columns(
+            3,
+            gap="small",
         )
 
-    with s4, st.container(border=True):
-        st.markdown("### 4️⃣ Prioridade")
-        st.write(
-            "O cliente recebe uma classificação "
-            "para apoiar a retenção."
-        )
-
-    st.code(
-        """
-Dados do cliente
-      |
-      v
-Machine Learning
-      |
-      v
-Probabilidade estimada de churn
-      |
-      v
-LOW / MEDIUM / HIGH
-      |
-      v
-MONITOR / ENGAGE / URGENT
-""",
-        language=None,
-    )
-
-    st.divider()
-
-    st.subheader(
-        "Como interpretar o risco?"
-    )
-
-    r1, r2, r3 = st.columns(3)
-
-    with r1, st.container(border=True):
-        st.markdown(
-            "### 🟢 LOW"
-        )
-        st.markdown(
-            "**Abaixo de 30%**"
-        )
-        st.write(
-            "Faixa de menor risco estimado."
-        )
-        st.markdown(
-            "**Prioridade: MONITOR**"
-        )
-
-    with r2, st.container(border=True):
-        st.markdown(
-            "### 🟠 MEDIUM"
-        )
-        st.markdown(
-            "**30% até menos de 60%**"
-        )
-        st.write(
-            "Faixa intermediária de risco."
-        )
-        st.markdown(
-            "**Prioridade: ENGAGE**"
-        )
-
-    with r3, st.container(border=True):
-        st.markdown(
-            "### 🔴 HIGH"
-        )
-        st.markdown(
-            "**60% ou mais**"
-        )
-        st.write(
-            "Faixa de maior risco estimado."
-        )
-        st.markdown(
-            "**Prioridade: URGENT**"
-        )
-
-    st.caption(
-        "As faixas LOW, MEDIUM e HIGH são regras "
-        "operacionais do projeto. Elas não significam "
-        "certeza de cancelamento."
-    )
-
-    st.divider()
-
-    st.subheader(
-        "Fila atual de retenção"
-    )
-
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric(
-        "🟢 Baixo risco",
-        f"{low:,}",
-    )
-
-    c2.metric(
-        "🟠 Risco moderado",
-        f"{medium:,}",
-    )
-
-    c3.metric(
-        "🔴 Alto risco",
-        f"{high:,}",
-    )
-
-    st.divider()
-
-    st.subheader(
-        "Qual modelo foi escolhido?"
-    )
-
-    selected_model = selection[
-        "selected_model"
-    ]
-
-    final_auc = float(
-        final_row["roc_auc"]
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            f"""
-### 🤖 {selected_model}
-
-Foram comparados três modelos:
-
-- Logistic Regression;
-- Random Forest;
-- XGBoost.
-
-O modelo selecionado foi **{selected_model}**.
-
-Ele foi escolhido usando o resultado médio da
-cross-validation.
-
-Depois da seleção, o modelo foi avaliado em um conjunto
-de teste final separado.
-
-### ROC-AUC final: {final_auc:.4f}
-
-Esse valor indica a capacidade do modelo de ordenar clientes
-de maior e menor risco.
-
-**Não significa que o modelo acerta 84,81% das previsões.**
-"""
-        )
-
-    st.divider()
-
-    st.subheader(
-        "Como navegar no projeto?"
-    )
-
-    page1, page2 = st.columns(2)
-
-    with page1:
-        with st.container(border=True):
-            st.markdown(
-                "### 🏠 Visão Geral"
+        with r1, st.container(border=True):
+            st.markdown("##### 🟢 LOW")
+            st.metric(
+                "Clientes",
+                f"{low:,}".replace(",", "."),
             )
-            st.write(
-                "Resumo dos clientes, churn, "
-                "risco e principais padrões."
-            )
+            st.caption("< 30% · MONITOR")
 
-        with st.container(border=True):
-            st.markdown(
-                "### 🔮 Prever Novo Cliente"
+        with r2, st.container(border=True):
+            st.markdown("##### 🟠 MEDIUM")
+            st.metric(
+                "Clientes",
+                f"{medium:,}".replace(",", "."),
             )
-            st.write(
-                "Permite preencher os dados de um "
-                "cliente e gerar uma previsão individual."
-            )
+            st.caption("30% a < 60% · ENGAGE")
 
-    with page2:
-        with st.container(border=True):
-            st.markdown(
-                "### 👥 Fila de Retenção"
+        with r3, st.container(border=True):
+            st.markdown("##### 🔴 HIGH")
+            st.metric(
+                "Clientes",
+                f"{high:,}".replace(",", "."),
             )
-            st.write(
-                "Organiza os clientes por risco "
-                "e prioridade operacional."
-            )
+            st.caption("≥ 60% · URGENT")
 
-        with st.container(border=True):
-            st.markdown(
-                "### 📊 Modelos e Explicabilidade"
-            )
-            st.write(
-                "Apresenta métricas, cross-validation, "
-                "erros, acertos e explicabilidade."
-            )
+    with navigation_tab:
+        n1, n2, n3, n4 = st.columns(
+            4,
+            gap="small",
+        )
 
+        with n1, st.container(border=True):
+            st.markdown("##### 🏠 Visão Geral")
+            st.caption("KPIs e risco")
+
+        with n2, st.container(border=True):
+            st.markdown("##### 🔮 Previsão")
+            st.caption("Novo cliente")
+
+        with n3, st.container(border=True):
+            st.markdown("##### 👥 Retenção")
+            st.caption("Fila operacional")
+
+        with n4, st.container(border=True):
+            st.markdown("##### 📊 Modelos")
+            st.caption("Métricas e explicação")
 
 def render_technical_view(
     data,
@@ -402,385 +227,130 @@ def render_technical_view(
     selection,
 ):
     final_row = final.iloc[0]
+    selected_model = selection["selected_model"]
 
-    selected_model = selection[
-        "selected_model"
-    ]
-
-    st.subheader(
-        "Metodologia de Ciência de Dados"
+    data_tab, validation_tab, explain_tab, stack_tab = st.tabs(
+        [
+            "🗂️ Dados e preparação",
+            "🔁 Validação",
+            "🧠 Explicabilidade",
+            "🛠️ Tecnologias e limites",
+        ]
     )
 
-    st.caption(
-        "Esta aba apresenta os detalhes técnicos "
-        "da construção e avaliação do projeto."
-    )
+    with data_tab:
+        left, right = st.columns(2, gap="large")
 
-    st.markdown(
-        "### 1. Dataset"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            f"""
-O dataset contém **{len(data):,} clientes**.
-
-Entre as informações utilizadas estão:
-
-- tempo como cliente;
-- cobrança mensal;
-- cobrança total;
-- tipo de contrato;
-- serviço de internet;
-- suporte técnico;
-- segurança online;
-- forma de pagamento;
-- serviços contratados;
-- características cadastrais.
-
-A variável alvo é **Churn**:
-
-- `Yes` → cliente teve churn;
-- `No` → cliente não teve churn.
+        with left, st.container(border=True):
+            st.markdown("#### Dataset")
+            st.markdown(
+                f"""
+- **{len(data):,} clientes**
+- Variável alvo: **Churn**
+- Perfil e características cadastrais
+- Serviços contratados
+- Contrato e forma de pagamento
+- Cobrança mensal e total
 """
-        )
+            )
 
-    st.markdown(
-        "### 2. Preparação dos dados"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            """
-O projeto utiliza um pipeline de pré-processamento.
-
-**Variáveis numéricas**
-
-São tratadas com:
-
-`StandardScaler`
-
-Exemplos:
-
-- tenure;
-- MonthlyCharges;
-- TotalCharges.
-
-**Variáveis categóricas**
-
-São transformadas usando:
-
-`OneHotEncoder`
-
-Exemplos:
-
-- Contract;
-- InternetService;
-- PaymentMethod;
-- TechSupport;
-- OnlineSecurity.
-
-O pré-processamento faz parte do mesmo pipeline do modelo,
-ajudando a manter consistência entre treinamento e previsão.
+        with right, st.container(border=True):
+            st.markdown("#### Pré-processamento")
+            st.markdown(
+                """
+- Numéricas → `StandardScaler`
+- Categóricas → `OneHotEncoder`
+- Pipeline único de pré-processamento + modelo
+- Mesmas transformações no treino e na previsão
 """
+            )
+
+    with validation_tab:
+        c1, c2, c3, c4, c5 = st.columns(5)
+        c1.metric(
+            "Desenvolvimento",
+            f'{selection["development_rows"]:,}',
+        )
+        c2.metric(
+            "Teste final",
+            f'{selection["final_test_rows"]:,}',
+        )
+        c3.metric(
+            "CV folds",
+            f'{selection["cv"]["folds"]}',
+        )
+        c4.metric(
+            "ROC-AUC CV",
+            f'{selection["selected_cv_roc_auc"]:.4f}',
+        )
+        c5.metric(
+            "ROC-AUC final",
+            f'{final_row["roc_auc"]:.4f}',
         )
 
-    st.markdown(
-        "### 3. Separação dos dados"
-    )
+        left, right = st.columns(2, gap="large")
 
-    with st.container(border=True):
-        st.markdown(
-            f"""
-A metodologia V1.1 utiliza:
+        with left, st.container(border=True):
+            st.markdown("#### Seleção do modelo")
+            st.write(
+                "Logistic Regression, Random Forest e XGBoost "
+                "foram comparados por ROC-AUC médio em "
+                "Stratified 5-Fold Cross-Validation."
+            )
+            st.success(f"Selecionado: {selected_model}")
 
-**80% para desenvolvimento**
+        with right, st.container(border=True):
+            st.markdown("#### Teste final")
+            st.write(
+                "O conjunto final foi preservado até depois da "
+                "seleção do algoritmo."
+            )
 
-- {selection["development_rows"]:,} clientes.
+    with explain_tab:
+        left, right = st.columns(2, gap="large")
 
-**20% para teste final**
+        with left, st.container(border=True):
+            st.markdown("#### Logistic Regression")
+            st.write(
+                "Modelo operacional selecionado. Coeficientes e "
+                "contribuições individuais ajudam a explicar o score."
+            )
 
-- {selection["final_test_rows"]:,} clientes.
+        with right, st.container(border=True):
+            st.markdown("#### XGBoost + SHAP")
+            st.write(
+                "Análise complementar de importância preditiva "
+                "em modelo baseado em árvores."
+            )
 
-A divisão foi feita de forma **estratificada pela variável
-Churn**.
+        st.info(
+            "Explicabilidade mostra como o modelo chegou ao score; "
+            "não demonstra causalidade."
+        )
 
-Isso ajuda a preservar a proporção das classes.
+    with stack_tab:
+        left, right = st.columns(2, gap="large")
 
-O conjunto de teste final não participa da seleção entre
-os modelos.
+        with left, st.container(border=True):
+            st.markdown("#### Tecnologias")
+            st.markdown(
+                """
+`Python` · `Pandas` · `SQL` · `scikit-learn` ·
+`XGBoost` · `SHAP` · `Streamlit` · `pytest` · `Ruff`
 """
-        )
+            )
 
-    st.markdown(
-        "### 4. Cross-Validation"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            f"""
-Foi utilizada:
-
-### {selection["cv"]["folds"]}-Fold Stratified Cross-Validation
-
-Os dados de desenvolvimento são divididos em cinco partes.
-
-Em cada rodada:
-
-1. quatro partes são usadas para treinamento;
-2. uma parte é usada para validação;
-3. o processo é repetido;
-4. cada parte participa da validação uma vez.
-
-A estratificação ajuda a manter a proporção de churn
-em cada divisão.
+        with right, st.container(border=True):
+            st.markdown("#### Limitações")
+            st.markdown(
+                """
+- Dataset de demonstração
+- Associação não significa causalidade
+- Threshold pode depender do custo de negócio
+- Calibração pode ser aprofundada
+- Produção exigiria monitoramento e detecção de drift
 """
-        )
-
-    st.markdown(
-        "### 5. Modelos avaliados"
-    )
-
-    m1, m2, m3 = st.columns(3)
-
-    with m1, st.container(border=True):
-        st.markdown(
-            "### Logistic Regression"
-        )
-        st.write(
-            "Modelo probabilístico linear, "
-            "interpretável e utilizado na versão final."
-        )
-
-    with m2, st.container(border=True):
-        st.markdown(
-            "### Random Forest"
-        )
-        st.write(
-            "Combina várias árvores de decisão "
-            "para produzir a classificação."
-        )
-
-    with m3, st.container(border=True):
-        st.markdown(
-            "### XGBoost"
-        )
-        st.write(
-            "Utiliza árvores construídas de forma "
-            "sequencial para corrigir erros anteriores."
-        )
-
-    st.markdown(
-        "### 6. Como o modelo foi selecionado?"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            f"""
-A métrica principal utilizada para seleção foi:
-
-### ROC-AUC médio da Cross-Validation
-
-Modelo selecionado:
-
-### ✅ {selected_model}
-
-ROC-AUC médio da cross-validation:
-
-### {selection["selected_cv_roc_auc"]:.4f}
-
-A seleção ocorreu antes da avaliação no conjunto de teste final.
-"""
-        )
-
-    st.markdown(
-        "### 7. Resultado no teste final"
-    )
-
-    c1, c2, c3, c4, c5 = st.columns(5)
-
-    c1.metric(
-        "Accuracy",
-        f'{final_row["accuracy"]:.4f}',
-    )
-
-    c2.metric(
-        "Precision",
-        f'{final_row["precision"]:.4f}',
-    )
-
-    c3.metric(
-        "Recall",
-        f'{final_row["recall"]:.4f}',
-    )
-
-    c4.metric(
-        "F1",
-        f'{final_row["f1"]:.4f}',
-    )
-
-    c5.metric(
-        "ROC-AUC",
-        f'{final_row["roc_auc"]:.4f}',
-    )
-
-    st.caption(
-        "Essas métricas correspondem ao conjunto "
-        "de teste final da V1.1."
-    )
-
-    st.markdown(
-        "### 8. Explicabilidade"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            """
-O projeto utiliza duas abordagens de explicabilidade.
-
-**Logistic Regression**
-
-É o modelo selecionado.
-
-Os coeficientes ajudam a entender quais características
-empurram o score para maior ou menor risco.
-
-Na previsão individual também são mostradas as contribuições
-das variáveis daquele cliente.
-
-**XGBoost + SHAP**
-
-O XGBoost foi mantido como análise complementar.
-
-O SHAP permite estudar a importância das variáveis nas
-previsões do modelo baseado em árvores.
-
-**Importância preditiva não significa causalidade.**
-"""
-        )
-
-    st.markdown(
-        "### 9. Threshold"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            """
-Para transformar a probabilidade em uma classe de churn,
-o modelo utiliza atualmente:
-
-### threshold = 0,50
-
-Isso significa:
-
-- abaixo de 50% → classe não churn;
-- 50% ou mais → classe churn.
-
-Alterar esse limite pode modificar:
-
-- Precision;
-- Recall;
-- F1;
-- falsos positivos;
-- falsos negativos.
-
-O melhor threshold pode depender do custo de negócio.
-"""
-        )
-
-    st.markdown(
-        "### 10. Limitações"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            """
-O projeto possui limitações que precisam ser consideradas:
-
-- utiliza um dataset de demonstração;
-- resultados não devem ser generalizados automaticamente;
-- as probabilidades ainda podem ser avaliadas quanto à calibração;
-- o threshold pode ser otimizado conforme o negócio;
-- associação não significa causalidade;
-- comportamento dos clientes pode mudar ao longo do tempo;
-- um modelo real em produção precisaria de monitoramento;
-- drift de dados e desempenho precisariam ser acompanhados.
-
-Reconhecer limitações faz parte de um projeto responsável
-de Ciência de Dados.
-"""
-        )
-
-    st.markdown(
-        "### 11. Tecnologias"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            """
-**Análise e dados**
-
-`Python` · `Pandas` · `SQL`
-
-**Machine Learning**
-
-`scikit-learn` · `XGBoost`
-
-**Explicabilidade**
-
-`Logistic Regression` · `SHAP`
-
-**Aplicação**
-
-`Streamlit`
-
-**Qualidade**
-
-`pytest` · `Ruff`
-
-**Conceitos aplicados**
-
-EDA · Estatística · Feature Engineering · Pipeline ·
-Cross-Validation · Holdout · Classificação ·
-Explicabilidade · Retenção.
-"""
-        )
-
-    st.markdown(
-        "### 12. O que este projeto demonstra?"
-    )
-
-    with st.container(border=True):
-        st.markdown(
-            """
-Este projeto demonstra um fluxo de Ciência de Dados que vai
-além de simplesmente treinar um algoritmo.
-
-Ele reúne:
-
-- entendimento do problema de negócio;
-- análise exploratória;
-- tratamento de dados;
-- SQL;
-- estatística;
-- preparação de features;
-- Machine Learning;
-- comparação entre modelos;
-- cross-validation;
-- avaliação final;
-- explicabilidade;
-- previsão de novos clientes;
-- segmentação de risco;
-- fila de retenção;
-- dashboard;
-- testes automatizados;
-- reprodutibilidade.
-
-O objetivo é transformar dados e Machine Learning em uma
-solução que também possa ser entendida e utilizada por pessoas
-de negócio.
-"""
-        )
+            )
 
 
 def render_about_page():
@@ -791,13 +361,15 @@ def render_about_page():
         selection,
     ) = load_about_data()
 
-    st.title(
-        "Sobre o Projeto"
+    st.markdown(
+        '<div class="churn-eyebrow">Contexto e metodologia</div>',
+        unsafe_allow_html=True,
     )
+    st.title("Sobre o Projeto")
 
     st.caption(
-        "Conheça o problema de negócio, o funcionamento "
-        "da solução e a metodologia de Ciência de Dados."
+        "Problema de negócio, fluxo da solução e metodologia "
+        "organizados para leitura rápida."
     )
 
     simple_tab, technical_tab = st.tabs(
@@ -822,12 +394,4 @@ def render_about_page():
             selection=selection,
         )
 
-    st.divider()
-
-    st.caption(
-        "Customer Churn Analytics · V1.1"
-    )
-
-
-if __name__ == "__main__":
-    render_about_page()
+    st.caption("Customer Churn Analytics · V1.1")

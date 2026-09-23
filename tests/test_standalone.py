@@ -35,7 +35,7 @@ def test_dashboard_overview_matches_current_artifacts():
 
     assert not app.exception
 
-    assert app.metric[0].value == "7,043"
+    assert app.metric[0].value == "7.043"
 
     assert app.metric[3].value == (
         f"{expected_high:,}"

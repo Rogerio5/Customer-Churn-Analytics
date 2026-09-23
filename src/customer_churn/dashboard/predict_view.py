@@ -235,54 +235,39 @@ def render_predict_customer() -> None:
     reference = load_reference_data()
     model = load_churn_model()
 
+    st.markdown(
+        '<div class="churn-eyebrow">Simulação individual</div>',
+        unsafe_allow_html=True,
+    )
     st.subheader("Dados do cliente")
-
-    st.write(
-        "Preencha as informações abaixo e clique em "
-        "**Analisar cliente**."
+    st.caption(
+        "Preencha o perfil em quatro grupos e execute a análise."
     )
 
-    col1, col2 = st.columns(2)
+    col1, col2, col3, col4 = st.columns(
+        4,
+        gap="medium",
+    )
 
     with col1:
+        st.markdown("##### Perfil")
         gender = st.selectbox(
             "Gênero",
-            sorted(
-                reference["gender"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["gender"].dropna().astype(str).unique()),
         )
-
         senior_citizen = st.selectbox(
             "Cliente idoso",
             [0, 1],
-            format_func=lambda value: (
-                "Sim" if value == 1 else "Não"
-            ),
+            format_func=lambda value: "Sim" if value == 1 else "Não",
         )
-
         partner = st.selectbox(
             "Possui parceiro(a)",
-            sorted(
-                reference["Partner"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["Partner"].dropna().astype(str).unique()),
         )
-
         dependents = st.selectbox(
             "Possui dependentes",
-            sorted(
-                reference["Dependents"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["Dependents"].dropna().astype(str).unique()),
         )
-
         tenure = st.number_input(
             "Tempo como cliente (meses)",
             min_value=0,
@@ -291,154 +276,76 @@ def render_predict_customer() -> None:
             step=1,
         )
 
+    with col2:
+        st.markdown("##### Telefonia e internet")
         phone_service = st.selectbox(
             "Serviço telefônico",
-            sorted(
-                reference["PhoneService"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["PhoneService"].dropna().astype(str).unique()),
         )
-
         multiple_lines = st.selectbox(
             "Múltiplas linhas",
-            sorted(
-                reference["MultipleLines"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["MultipleLines"].dropna().astype(str).unique()),
         )
-
         internet_service = st.selectbox(
             "Serviço de internet",
-            sorted(
-                reference["InternetService"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["InternetService"].dropna().astype(str).unique()),
         )
-
         online_security = st.selectbox(
             "Segurança online",
-            sorted(
-                reference["OnlineSecurity"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["OnlineSecurity"].dropna().astype(str).unique()),
         )
-
         online_backup = st.selectbox(
             "Backup online",
-            sorted(
-                reference["OnlineBackup"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["OnlineBackup"].dropna().astype(str).unique()),
         )
 
-    with col2:
+    with col3:
+        st.markdown("##### Serviços")
         device_protection = st.selectbox(
             "Proteção do dispositivo",
-            sorted(
-                reference["DeviceProtection"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["DeviceProtection"].dropna().astype(str).unique()),
         )
-
         tech_support = st.selectbox(
             "Suporte técnico",
-            sorted(
-                reference["TechSupport"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["TechSupport"].dropna().astype(str).unique()),
         )
-
         streaming_tv = st.selectbox(
             "Streaming TV",
-            sorted(
-                reference["StreamingTV"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["StreamingTV"].dropna().astype(str).unique()),
         )
-
         streaming_movies = st.selectbox(
             "Streaming de filmes",
-            sorted(
-                reference["StreamingMovies"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["StreamingMovies"].dropna().astype(str).unique()),
         )
-
         contract = st.selectbox(
             "Tipo de contrato",
-            sorted(
-                reference["Contract"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["Contract"].dropna().astype(str).unique()),
         )
 
+    with col4:
+        st.markdown("##### Cobrança")
         paperless_billing = st.selectbox(
             "Fatura digital",
-            sorted(
-                reference["PaperlessBilling"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["PaperlessBilling"].dropna().astype(str).unique()),
         )
-
         payment_method = st.selectbox(
             "Forma de pagamento",
-            sorted(
-                reference["PaymentMethod"]
-                .dropna()
-                .astype(str)
-                .unique()
-            ),
+            sorted(reference["PaymentMethod"].dropna().astype(str).unique()),
         )
-
         monthly_charges = st.number_input(
             "Cobrança mensal",
             min_value=0.0,
-            value=float(
-                round(
-                    reference["MonthlyCharges"].median(),
-                    2,
-                )
-            ),
+            value=float(round(reference["MonthlyCharges"].median(), 2)),
             step=1.0,
             format="%.2f",
         )
-
         total_charges = st.number_input(
             "Total acumulado de cobranças",
             min_value=0.0,
-            value=float(
-                round(
-                    reference["TotalCharges"].median(),
-                    2,
-                )
-            ),
+            value=float(round(reference["TotalCharges"].median(), 2)),
             step=10.0,
             format="%.2f",
         )
-
-    st.divider()
 
     analyze = st.button(
         "Analisar cliente",
@@ -486,7 +393,10 @@ def render_predict_customer() -> None:
 
     probability_percent = probability * 100
 
-    st.subheader("Resultado da análise")
+    st.markdown(
+        '<div class="churn-eyebrow">Resultado da análise</div>',
+        unsafe_allow_html=True,
+    )
 
     result_col1, result_col2, result_col3 = st.columns(3)
 
@@ -512,28 +422,19 @@ def render_predict_customer() -> None:
 
     if risk_level == "HIGH":
         st.error(
-            "Alto risco de churn. "
-            "O cliente deve receber prioridade na análise "
-            "da equipe de retenção."
+            "Alto risco: priorizar a análise deste cliente "
+            "na operação de retenção."
         )
-
     elif risk_level == "MEDIUM":
         st.warning(
-            "Risco intermediário de churn. "
-            "Recomenda-se acompanhamento e ações de engajamento."
+            "Risco moderado: acompanhar e avaliar ações "
+            "de engajamento."
         )
-
     else:
         st.success(
-            "Baixo risco de churn. "
-            "O cliente pode permanecer em monitoramento."
+            "Baixo risco: manter acompanhamento e "
+            "monitoramento periódico."
         )
-
-    st.caption(
-        "Segmentação operacional: "
-        "LOW < 30% | MEDIUM de 30% a menos de 60% | "
-        "HIGH a partir de 60%."
-    )
 
     explanation = ChurnLogisticExplainer().explain(
         model,
@@ -545,7 +446,6 @@ def render_predict_customer() -> None:
         direction="positive",
         top_n=3,
     )
-
     negative_labels = top_factor_labels(
         explanation.contributions,
         direction="negative",
@@ -566,138 +466,106 @@ def render_predict_customer() -> None:
         profile.risk_level.value,
     )
 
-    positive_bullets = "\n".join(
-        f"- **{factor}**"
-        for factor in positive_labels
-    )
-
-    negative_bullets = "\n".join(
-        f"- **{factor}**"
-        for factor in negative_labels
-    )
-
-    if not positive_bullets:
-        positive_bullets = (
-            "- Nenhum sinal de aumento relevante foi identificado."
-        )
-
-    if not negative_bullets:
-        negative_bullets = (
-            "- Nenhum sinal de redução relevante foi identificado."
-        )
-
-    st.markdown("### 🧠 Entenda este resultado")
-
-    with st.container(border=True):
-        st.markdown(
-            f"""
-Este cliente apresenta **risco {risk_plain} de cancelamento**,
-com probabilidade estimada de **{probability_percent:.2f}%**.
-
-O modelo encontrou características no perfil que contribuíram
-para aumentar ou reduzir essa estimativa.
-
-**Sinais que mais aumentaram o risco estimado:**
-
-{positive_bullets}
-
-**Sinais que ajudaram a reduzir o risco estimado:**
-
-{negative_bullets}
-
-**O que fazer agora:** {guidance}
-"""
-        )
-
-        st.caption(
-            "Esta leitura resume a previsão do próprio modelo. "
-            "Ela ajuda a entender o resultado, mas não significa "
-            "que esses fatores causaram o cancelamento nem que o "
-            "cliente certamente irá cancelar."
-        )
-
-    st.divider()
-
-    st.subheader("Por que o modelo chegou a esse resultado?")
-
-    st.caption(
-        "A explicação abaixo mostra as contribuições das variáveis "
-        "para o score da Logistic Regression. "
-        "Valores positivos aumentam o score de churn e valores "
-        "negativos reduzem. Essas contribuições não representam causalidade."
-    )
-
     positive = contribution_dataframe(
         explanation.contributions,
         direction="positive",
     )
-
     negative = contribution_dataframe(
         explanation.contributions,
         direction="negative",
     )
 
-    explain_col1, explain_col2 = st.columns(2)
+    summary_tab, factors_tab, technical_tab = st.tabs(
+        [
+            "🧭 Resumo operacional",
+            "🧠 Fatores da previsão",
+            "🔧 Detalhes técnicos",
+        ]
+    )
 
-    with explain_col1:
-        st.markdown("#### ⬆ Sinais que aumentaram o risco estimado")
+    with summary_tab:
+        left, right = st.columns(
+            [1.05, 0.95],
+            gap="large",
+        )
 
-        with st.container(border=True):
+        with left, st.container(border=True):
+            st.markdown("#### Interpretação")
+            st.write(
+                f"Este perfil apresenta **risco {risk_plain}**, "
+                f"com probabilidade estimada de "
+                f"**{probability_percent:.2f}%**."
+            )
+            st.markdown(f"**Próxima ação:** {guidance}")
             st.caption(
-                "💡 Como ler: estes são os sinais do perfil "
-                "que mais puxaram a previsão de churn para cima."
+                "A previsão ajuda na priorização, mas não representa "
+                "certeza de cancelamento."
             )
 
-        if positive.empty:
-            st.info(
-                "Nenhuma contribuição positiva relevante "
-                "foi identificada."
-            )
-        else:
-            st.dataframe(
-                positive,
-                hide_index=True,
-                width="stretch",
-            )
+        with right, st.container(border=True):
+            st.markdown("#### Sinais principais")
+            st.markdown("**Aumentaram o risco estimado**")
+            if positive_labels:
+                for factor in positive_labels:
+                    st.markdown(f"- {factor}")
+            else:
+                st.caption(
+                    "Nenhum fator de aumento relevante identificado."
+                )
 
-    with explain_col2:
-        st.markdown("#### ⬇ Sinais que reduziram o risco estimado")
+            st.markdown("**Reduziram o risco estimado**")
+            if negative_labels:
+                for factor in negative_labels:
+                    st.markdown(f"- {factor}")
+            else:
+                st.caption(
+                    "Nenhum fator de redução relevante identificado."
+                )
 
-        with st.container(border=True):
-            st.caption(
-                "💡 Como ler: estes são os sinais do perfil "
-                "que ajudaram a puxar a previsão de churn "
-                "para baixo."
-            )
+    with factors_tab:
+        explain_col1, explain_col2 = st.columns(
+            2,
+            gap="large",
+        )
 
-        if negative.empty:
-            st.info(
-                "Nenhuma contribuição negativa relevante "
-                "foi identificada."
-            )
-        else:
-            st.dataframe(
-                negative,
-                hide_index=True,
-                width="stretch",
-            )
+        with explain_col1:
+            st.markdown("##### ⬆ Aumentaram o risco")
+            if positive.empty:
+                st.info(
+                    "Nenhuma contribuição positiva relevante."
+                )
+            else:
+                st.dataframe(
+                    positive,
+                    hide_index=True,
+                    width="stretch",
+                    height=250,
+                )
 
-    with st.expander("Detalhes técnicos da explicação"):
-        with st.container(border=True):
-            st.caption(
-                "🔧 Área técnica: destinada a quem deseja entender "
-                "o cálculo em maior profundidade. Aqui aparecem os "
-                "valores após o pré-processamento, os coeficientes "
-                "aprendidos pela Logistic Regression e a contribuição "
-                "numérica de cada variável."
-            )
+        with explain_col2:
+            st.markdown("##### ⬇ Reduziram o risco")
+            if negative.empty:
+                st.info(
+                    "Nenhuma contribuição negativa relevante."
+                )
+            else:
+                st.dataframe(
+                    negative,
+                    hide_index=True,
+                    width="stretch",
+                    height=250,
+                )
 
+        st.caption(
+            "As contribuições descrevem o comportamento da "
+            "Logistic Regression e não representam causalidade."
+        )
+
+    with technical_tab:
         technical = pd.DataFrame(
             [
                 {
-                    "Fator": humanize_feature(
-                        item.feature
-                    ),
+                    "Fator": humanize_feature(item.feature),
                     "Valor transformado": round(
                         item.transformed_value,
                         4,
@@ -722,56 +590,48 @@ para aumentar ou reduzir essa estimativa.
             ascending=False,
         )
 
-        st.metric(
-            "Score linear da Logistic Regression",
+        score_col, rule_col = st.columns(
+            [0.35, 0.65],
+        )
+        score_col.metric(
+            "Decision score",
             f"{explanation.decision_score:.4f}",
+        )
+        rule_col.info(
+            "LOW < 30% · MEDIUM 30% a < 60% · HIGH ≥ 60%"
         )
 
         st.dataframe(
             technical,
             hide_index=True,
             width="stretch",
+            height=310,
         )
 
-    st.divider()
-
-    with st.expander("Ver dados analisados"):
-        with st.container(border=True):
-            st.caption(
-                "📥 Dados utilizados: estas são as informações "
-                "preenchidas no formulário e enviadas ao modelo "
-                "para calcular a previsão apresentada acima."
+        with st.expander("Ver dados enviados ao modelo"):
+            display_customer = customer.copy()
+            display_customer.insert(
+                0,
+                "Probabilidade de churn",
+                f"{probability_percent:.2f}%",
+            )
+            display_customer.insert(
+                1,
+                "Risco",
+                profile.risk_level.value,
+            )
+            display_customer.insert(
+                2,
+                "Prioridade",
+                profile.retention_priority.value,
+            )
+            st.dataframe(
+                display_customer,
+                hide_index=True,
+                width="stretch",
             )
 
-        display_customer = customer.copy()
-
-        display_customer.insert(
-            0,
-            "Probabilidade de churn",
-            f"{probability_percent:.2f}%",
-        )
-
-        display_customer.insert(
-            1,
-            "Risco",
-            profile.risk_level.value,
-        )
-
-        display_customer.insert(
-            2,
-            "Prioridade",
-            profile.retention_priority.value,
-        )
-
-        st.dataframe(
-            display_customer,
-            hide_index=True,
-            width="stretch",
-        )
-
-    st.divider()
-
     st.caption(
-        "Esta previsão é uma estimativa preditiva e não uma "
-        "conclusão causal sobre o comportamento do cliente."
+        "Estimativa preditiva baseada nos padrões do dataset "
+        "IBM Telco Customer Churn."
     )

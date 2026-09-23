@@ -20,17 +20,14 @@ def load_retention_data() -> pd.DataFrame:
 
 
 def render_retention_queue() -> None:
-    st.title("Fila de Retenção")
-
-    st.caption(
-        "Priorização operacional dos clientes conforme a "
-        "probabilidade estimada de churn."
+    st.markdown(
+        '<div class="churn-eyebrow">Operação de retenção</div>',
+        unsafe_allow_html=True,
     )
-
-    st.info(
-        "Esta fila organiza os clientes por risco preditivo. "
-        "Ela ajuda a decidir quem analisar primeiro, mas não "
-        "significa que um cliente certamente irá cancelar."
+    st.title("Fila de Retenção")
+    st.caption(
+        "Priorize clientes por probabilidade estimada de churn, "
+        "aplique filtros e exporte a seleção."
     )
 
     data = load_retention_data()
@@ -39,254 +36,175 @@ def render_retention_queue() -> None:
     medium = int((data["risk_level"] == "MEDIUM").sum())
     low = int((data["risk_level"] == "LOW").sum())
 
-    metric1, metric2, metric3, metric4 = st.columns(4)
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Clientes avaliados", f"{len(data):,}")
+    m2.metric("🔴 Alto risco", f"{high:,}")
+    m3.metric("🟠 Risco moderado", f"{medium:,}")
+    m4.metric("🟢 Baixo risco", f"{low:,}")
 
-    with metric1:
-        st.metric(
-            "Clientes avaliados",
-            f"{len(data):,}",
-        )
-
-    with metric2:
-        st.metric(
-            "🔴 Alto risco",
-            f"{high:,}",
-        )
-
-    with metric3:
-        st.metric(
-            "🟠 Risco moderado",
-            f"{medium:,}",
-        )
-
-    with metric4:
-        st.metric(
-            "🟢 Baixo risco",
-            f"{low:,}",
-        )
-
-    st.divider()
-
-    st.subheader("Como interpretar a fila")
-
-    col1, col2, col3 = st.columns(3)
-
-    with col1, st.container(border=True):
-        st.markdown("### 🔴 HIGH")
-        st.markdown("**Prioridade: URGENT**")
-        st.write(
-            "Clientes com probabilidade estimada "
-            "de churn a partir de 60%."
-        )
-        st.caption(
-            "Devem aparecer primeiro na análise da "
-            "equipe de retenção."
-        )
-
-    with col2, st.container(border=True):
-        st.markdown("### 🟠 MEDIUM")
-        st.markdown("**Prioridade: ENGAGE**")
-        st.write(
-            "Clientes com probabilidade estimada "
-            "entre 30% e menos de 60%."
-        )
-        st.caption(
-            "Podem receber acompanhamento e ações "
-            "de relacionamento."
-        )
-
-    with col3, st.container(border=True):
-        st.markdown("### 🟢 LOW")
-        st.markdown("**Prioridade: MONITOR**")
-        st.write(
-            "Clientes com probabilidade estimada "
-            "abaixo de 30%."
-        )
-        st.caption(
-            "Podem permanecer em acompanhamento "
-            "normal."
-        )
-
-    st.divider()
-
-    st.subheader("Filtrar clientes")
-
-    filter1, filter2, filter3 = st.columns(3)
-
-    with filter1:
-        selected_risks = st.multiselect(
-            "Nível de risco",
-            ["HIGH", "MEDIUM", "LOW"],
-            default=["HIGH"],
-        )
-
-    with filter2:
-        contracts = sorted(
-            data["Contract"]
-            .dropna()
-            .astype(str)
-            .unique()
-        )
-
-        selected_contracts = st.multiselect(
-            "Tipo de contrato",
-            contracts,
-        )
-
-    with filter3:
-        customer_search = st.text_input(
-            "Buscar cliente",
-            placeholder="Ex.: 2754-SDJRD",
-        )
-
-    filtered = data.copy()
-
-    if selected_risks:
-        filtered = filtered[
-            filtered["risk_level"].isin(
-                selected_risks
-            )
-        ]
-
-    if selected_contracts:
-        filtered = filtered[
-            filtered["Contract"].isin(
-                selected_contracts
-            )
-        ]
-
-    if customer_search.strip():
-        filtered = filtered[
-            filtered["customer_id"]
-            .astype(str)
-            .str.contains(
-                customer_search.strip(),
-                case=False,
-                na=False,
-            )
-        ]
-
-    filtered = filtered.sort_values(
-        "churn_probability",
-        ascending=False,
+    operation_tab, rules_tab = st.tabs(
+        ["🎯 Fila operacional", "ℹ️ Como interpretar"]
     )
 
-    st.divider()
+    with operation_tab:
+        f1, f2, f3 = st.columns([1, 1, 1.15], gap="medium")
 
-    st.subheader("Clientes priorizados")
-
-    st.caption(
-        "💡 Como ler: a lista começa pelos clientes com "
-        "maior probabilidade estimada de churn dentro "
-        "dos filtros selecionados."
-    )
-
-    count_col, average_col = st.columns(2)
-
-    with count_col:
-        st.metric(
-            "Clientes encontrados",
-            f"{len(filtered):,}",
-        )
-
-    with average_col:
-        if filtered.empty:
-            average_probability = 0.0
-        else:
-            average_probability = (
-                filtered["churn_probability"].mean()
-                * 100
+        with f1:
+            selected_risks = st.multiselect(
+                "Nível de risco",
+                ["HIGH", "MEDIUM", "LOW"],
+                default=["HIGH"],
             )
 
-        st.metric(
-            "Risco médio da seleção",
-            f"{average_probability:.2f}%",
-        )
+        with f2:
+            contracts = sorted(
+                data["Contract"].dropna().astype(str).unique()
+            )
+            selected_contracts = st.multiselect(
+                "Tipo de contrato",
+                contracts,
+            )
 
-    display = filtered[
-        [
-            "customer_id",
+        with f3:
+            customer_search = st.text_input(
+                "Buscar cliente",
+                placeholder="Ex.: 2754-SDJRD",
+            )
+
+        filtered = data.copy()
+
+        if selected_risks:
+            filtered = filtered[
+                filtered["risk_level"].isin(selected_risks)
+            ]
+
+        if selected_contracts:
+            filtered = filtered[
+                filtered["Contract"].isin(selected_contracts)
+            ]
+
+        if customer_search.strip():
+            filtered = filtered[
+                filtered["customer_id"]
+                .astype(str)
+                .str.contains(
+                    customer_search.strip(),
+                    case=False,
+                    na=False,
+                )
+            ]
+
+        filtered = filtered.sort_values(
             "churn_probability",
-            "risk_level",
-            "retention_priority",
-            "tenure",
-            "MonthlyCharges",
-            "Contract",
-            "InternetService",
-            "PaymentMethod",
-            "TechSupport",
-            "OnlineSecurity",
-            "actual_churn",
-        ]
-    ].copy()
+            ascending=False,
+        )
 
-    display["churn_probability"] = (
-        display["churn_probability"]
-        .mul(100)
-        .map(lambda value: f"{value:.2f}%")
-    )
+        average_probability = (
+            0.0
+            if filtered.empty
+            else filtered["churn_probability"].mean() * 100
+        )
 
-    display = display.rename(
-        columns={
-            "customer_id": "Cliente",
-            "churn_probability": "Probabilidade de churn",
-            "risk_level": "Risco",
-            "retention_priority": "Prioridade",
-            "tenure": "Tempo como cliente (meses)",
-            "MonthlyCharges": "Cobrança mensal",
-            "Contract": "Contrato",
-            "InternetService": "Internet",
-            "PaymentMethod": "Pagamento",
-            "TechSupport": "Suporte técnico",
-            "OnlineSecurity": "Segurança online",
-            "actual_churn": "Churn observado",
-        }
-    )
+        s1, s2, s3 = st.columns([0.8, 0.8, 1.4])
+        s1.metric("Clientes encontrados", f"{len(filtered):,}")
+        s2.metric("Risco médio", f"{average_probability:.2f}%")
 
-    st.dataframe(
-        display,
-        hide_index=True,
-        width="stretch",
-    )
+        active_risks = (
+            ", ".join(selected_risks)
+            if selected_risks
+            else "Todos"
+        )
+        s3.info(
+            f"Faixas ativas: {active_risks}. "
+            "A tabela começa pelos maiores riscos."
+        )
 
-    st.caption(
-        "Churn observado indica o resultado existente no "
-        "dataset de teste. A probabilidade é a estimativa "
-        "produzida pelo modelo de referência."
-    )
+        display = filtered[
+            [
+                "customer_id",
+                "churn_probability",
+                "risk_level",
+                "retention_priority",
+                "tenure",
+                "MonthlyCharges",
+                "Contract",
+                "InternetService",
+                "PaymentMethod",
+                "TechSupport",
+                "OnlineSecurity",
+                "actual_churn",
+            ]
+        ].copy()
 
-    csv = filtered.to_csv(
-        index=False
-    ).encode("utf-8")
+        display["churn_probability"] = (
+            display["churn_probability"]
+            .mul(100)
+            .map(lambda value: f"{value:.2f}%")
+        )
 
-    st.download_button(
-        "Baixar clientes filtrados",
-        data=csv,
-        file_name="fila_retencao_filtrada.csv",
-        mime="text/csv",
-        use_container_width=True,
-    )
+        display = display.rename(
+            columns={
+                "customer_id": "Cliente",
+                "churn_probability": "Probabilidade de churn",
+                "risk_level": "Risco",
+                "retention_priority": "Prioridade",
+                "tenure": "Tempo (meses)",
+                "MonthlyCharges": "Cobrança mensal",
+                "Contract": "Contrato",
+                "InternetService": "Internet",
+                "PaymentMethod": "Pagamento",
+                "TechSupport": "Suporte técnico",
+                "OnlineSecurity": "Segurança online",
+                "actual_churn": "Churn observado",
+            }
+        )
 
-    st.divider()
+        st.dataframe(
+            display,
+            hide_index=True,
+            width="stretch",
+            height=430,
+        )
 
-    with st.expander(
-        "Entenda como a prioridade é definida"
-    ):
-        st.markdown(
-            """
-A prioridade é uma regra operacional do projeto:
+        d1, d2 = st.columns([0.7, 1.3])
 
-- **HIGH → URGENT:** analisar primeiro.
-- **MEDIUM → ENGAGE:** acompanhar e engajar.
-- **LOW → MONITOR:** manter monitoramento.
+        csv = filtered.to_csv(index=False).encode("utf-8")
 
-Os limites utilizados são:
+        with d1:
+            st.download_button(
+                "Baixar seleção em CSV",
+                data=csv,
+                file_name="fila_retencao_filtrada.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
 
-- **LOW:** abaixo de 30%.
-- **MEDIUM:** de 30% até menos de 60%.
-- **HIGH:** a partir de 60%.
+        with d2:
+            st.caption(
+                "Churn observado é o resultado existente no dataset "
+                "de teste; a probabilidade é a estimativa do modelo."
+            )
 
-Essas faixas ajudam a organizar a operação. Elas não
-representam causalidade nem garantem que o cliente irá cancelar.
-"""
+    with rules_tab:
+        r1, r2, r3 = st.columns(3, gap="medium")
+
+        with r1, st.container(border=True):
+            st.markdown("#### 🔴 HIGH")
+            st.markdown("**URGENT · 60% ou mais**")
+            st.write("Analisar primeiro na operação de retenção.")
+
+        with r2, st.container(border=True):
+            st.markdown("#### 🟠 MEDIUM")
+            st.markdown("**ENGAGE · 30% a < 60%**")
+            st.write("Acompanhar e avaliar ações de engajamento.")
+
+        with r3, st.container(border=True):
+            st.markdown("#### 🟢 LOW")
+            st.markdown("**MONITOR · abaixo de 30%**")
+            st.write("Manter acompanhamento normal.")
+
+        st.info(
+            "As faixas são regras operacionais do projeto. "
+            "Elas não representam causalidade e não garantem "
+            "que um cliente irá cancelar."
         )
