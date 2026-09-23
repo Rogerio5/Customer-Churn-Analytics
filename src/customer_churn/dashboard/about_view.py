@@ -394,4 +394,4 @@ def render_about_page():
             selection=selection,
         )
 
-    st.caption("Customer Churn Analytics · V1.1")
+    st.caption("Customer Churn Analytics · v1.2.0")

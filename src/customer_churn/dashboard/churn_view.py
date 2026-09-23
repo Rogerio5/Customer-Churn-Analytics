@@ -768,5 +768,5 @@ def render_churn_dashboard() -> None:
             )
 
     st.caption(
-        "Customer Churn Analytics · V1.1"
+        "Customer Churn Analytics · v1.2.0"
     )
