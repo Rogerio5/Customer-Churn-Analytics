@@ -1,4 +1,4 @@
-# Customer Churn Analytics
+# Customer Churn Analytics & Prediction
 
 > **Customer Analytics · Machine Learning · Retention Intelligence · Explainable AI · Streamlit · SQL · Power BI**
 
